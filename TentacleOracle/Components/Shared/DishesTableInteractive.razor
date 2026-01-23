@@ -1,0 +1,28 @@
+﻿@using TentacleOracle.Services
+@inject DishStateService DishStateService
+@implements IDisposable
+@rendermode InteractiveServer
+
+@if (Dishes == null)
+{
+    <tr><td colspan="5">Loading...</td></tr>
+}
+else if (Dishes.Count == 0)
+{
+    <tr><td colspan="5">No entries were found!</td></tr>
+}
+else
+{
+    @foreach (var dish in Dishes)
+    {
+        var isSelected = dish.Id == DishStateService.SelectedDish?.Id;
+        <tr class="@(isSelected ? "selected" : "")" 
+            @onclick="() => SelectDish(dish)">
+            <td>@dish.Name</td>
+            <td>@dish.Category</td>
+            <td>@dish.Kcal</td>
+            <td>@dish.Effort</td>
+            <td>@((dish.RatingA + dish.RatingR)/2.0)</td>
+        </tr>
+    }
+}

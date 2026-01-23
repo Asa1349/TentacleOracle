@@ -28,6 +28,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddMudServices();
+builder.Services.AddScoped<IDishService, DishService>();
+builder.Services.AddScoped<DishStateService>();
 builder.Services.AddScoped<NavigationStateService>();
 
 var app = builder.Build();
