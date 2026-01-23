@@ -1,0 +1,23 @@
+﻿@using TentacleOracle.Services
+@inject NavigationStateService NavStateService
+@implements IDisposable
+
+<div class="control-layout">
+  
+    @if (NavStateService.CurrentControlType != null)
+    {
+        <DynamicComponent Type="NavStateService.CurrentControlType" />
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavStateService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        NavStateService.OnChange -= StateHasChanged;
+    }
+}

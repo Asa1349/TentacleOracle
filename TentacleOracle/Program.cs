@@ -5,6 +5,7 @@ using MudBlazor.Services;
 using TentacleOracle.Components;
 using TentacleOracle.Components.Account;
 using TentacleOracle.Data;
+using TentacleOracle.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddMudServices();
+builder.Services.AddScoped<NavigationStateService>();
 
 var app = builder.Build();
 
