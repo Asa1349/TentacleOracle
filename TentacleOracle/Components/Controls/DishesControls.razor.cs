@@ -1,5 +1,5 @@
-﻿using FoodOracle.Models;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
+using TentacleOracle.Models;
 using TentacleOracle.Services;
 
 namespace TentacleOracle.Components.Controls;

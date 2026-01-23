@@ -8,7 +8,7 @@ using TentacleOracle.Data;
 
 #nullable disable
 
-namespace FoodOracle.Migrations
+namespace TentacleOracle.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -22,7 +22,7 @@ namespace FoodOracle.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("FoodOracle.Models.Dish", b =>
+            modelBuilder.Entity("TentacleOracle.Models.Dish", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

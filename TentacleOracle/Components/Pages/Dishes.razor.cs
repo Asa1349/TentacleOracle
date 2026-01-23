@@ -1,7 +1,7 @@
-﻿using FoodOracle.Models;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using TentacleOracle.Base;
 using TentacleOracle.Components.Controls;
+using TentacleOracle.Models;
 using TentacleOracle.Services;
 
 namespace TentacleOracle.Components.Pages;

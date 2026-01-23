@@ -1,5 +1,5 @@
-﻿using FoodOracle.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using TentacleOracle.Models;
 
 namespace TentacleOracle.Data;
 

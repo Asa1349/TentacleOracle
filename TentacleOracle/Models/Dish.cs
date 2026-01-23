@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FoodOracle.Models;
+namespace TentacleOracle.Models;
 
 public class Dish
 {

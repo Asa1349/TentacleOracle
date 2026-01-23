@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace FoodOracle.Migrations
+namespace TentacleOracle.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

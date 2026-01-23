@@ -1,4 +1,4 @@
-﻿using FoodOracle.Models;
+﻿using TentacleOracle.Models;
 
 namespace TentacleOracle.Services;
 
