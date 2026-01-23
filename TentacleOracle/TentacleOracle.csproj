@@ -62,6 +62,15 @@
       <_ContentIncludedByDefault Remove="Components\Pages\Error.razor" />
       <_ContentIncludedByDefault Remove="Components\Pages\Home.razor" />
       <_ContentIncludedByDefault Remove="Components\Pages\Weather.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Dashboard.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Dishes.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Error.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Recipes.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Settings.razor" />
+      <_ContentIncludedByDefault Remove="Controls\DishesControls.razor" />
+      <_ContentIncludedByDefault Remove="Controls\RecipesControls.razor" />
+      <_ContentIncludedByDefault Remove="Controls\SettingsControls.razor" />
+      <_ContentIncludedByDefault Remove="Dialog\SimpleDialog.razor" />
     </ItemGroup>
 
 </Project>

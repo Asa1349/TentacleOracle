@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using TentacleOracle.Services;
 
-namespace TentacleOracle.Controls;
+namespace TentacleOracle.Components.Controls;
 
 public partial class DishesControls : ComponentBase, IDisposable
 {

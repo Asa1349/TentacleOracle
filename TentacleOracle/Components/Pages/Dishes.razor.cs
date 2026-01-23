@@ -1,10 +1,10 @@
 ﻿using FoodOracle.Models;
 using Microsoft.AspNetCore.Components;
 using TentacleOracle.Base;
-using TentacleOracle.Controls;
+using TentacleOracle.Components.Controls;
 using TentacleOracle.Services;
 
-namespace TentacleOracle.Pages;
+namespace TentacleOracle.Components.Pages;
 
 public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 {

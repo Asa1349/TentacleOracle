@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace FoodOracle.Components.Controls;
+namespace TentacleOracle.Components.Controls;
 
 public partial class SettingsControls : ComponentBase
 {

@@ -1,6 +1,6 @@
 ﻿using TentacleOracle.Base;
 
-namespace TentacleOracle.Pages;
+namespace TentacleOracle.Components.Pages;
 
 public partial class Dashboard : BasePageComponent
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace TentacleOracle.Controls;
+namespace TentacleOracle.Components.Controls;
 
 public partial class RecipesControls : ComponentBase
 {
