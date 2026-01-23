@@ -1,5 +1,6 @@
 ﻿@page "/"
 @* @using FoodOracle.Components.Dialog *@
+@using FoodOracle.Components.Dialog
 @using MudBlazor
 @inherits TentacleOracle.Base.BasePageComponent
 @inject DialogService DialogService
@@ -19,7 +20,6 @@
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
 
-        // return DialogService.ShowAsync<SimpleDialog>("Simple Dialog", options);
-        return Task.CompletedTask;
+        return DialogService.ShowAsync<SimpleDialog>("Simple Dialog", options);
     }
 }
