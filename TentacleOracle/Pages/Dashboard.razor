@@ -1,0 +1,25 @@
+﻿@page "/"
+@* @using FoodOracle.Components.Dialog *@
+@using MudBlazor
+@inherits TentacleOracle.Base.BasePageComponent
+@inject DialogService DialogService
+
+
+<h2>Dashboard</h2>
+
+<p>Willkommen in der Food Oracle Anwendung!</p>
+<br/>
+<br/>
+<MudButton OnClick="OpenDialogAsync" Variant="Variant.Filled" Color="Color.Primary">
+    Open simple dialog
+</MudButton>
+
+@code {
+    private Task OpenDialogAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        // return DialogService.ShowAsync<SimpleDialog>("Simple Dialog", options);
+        return Task.CompletedTask;
+    }
+}

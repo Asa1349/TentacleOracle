@@ -1,0 +1,23 @@
+﻿<div class="button-container">
+    <div class="button-group">
+        <button class="styled-button" @onclick="GenerateWeeklyPlan">
+            Generate
+        </button>
+
+        <button class="styled-button" @onclick="AddDish">
+            Add
+        </button>
+
+        <button class="styled-button"
+                @onclick="EditSelectedDish"
+                disabled="@(SelectedDish == null)">
+            Edit
+        </button>
+
+        <button class="styled-button"
+                @onclick="DeleteSelectedDish"
+                disabled="@(SelectedDish == null)">
+            Delete
+        </button>
+    </div>
+</div>

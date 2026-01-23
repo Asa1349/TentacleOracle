@@ -1,0 +1,22 @@
+﻿@page "/dishes"
+@inherits TentacleOracle.Base.BasePageWithControlsComponent<TentacleOracle.Controls.DishesControls>
+@attribute [StreamRendering]
+
+<h2>Dishes</h2>
+
+<div class="table-container">
+    <table class="content">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>kcal/Serving</th>
+            <th>Effort</th>
+            <th>Rating</th>
+        </tr>
+        </thead>
+        <tbody>
+        <DishesTableInteractive Dishes="_dishes" />
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,24 @@
+﻿<div class="button-container">
+    <div class="button-group">
+        <button class="styled-button" @onclick="AddRecipe">
+            Add Recipe
+        </button>
+
+        <button class="styled-button" @onclick="EditSelectedRecipe"
+                disabled="@(SelectedRecipe == null)">
+            Edit Recipe
+        </button>
+
+        <button class="styled-button"
+                @onclick="DeleteSelectedRecipe"
+                disabled="@(SelectedRecipe == null)">
+            Delete Recipe
+        </button>
+
+        <button class="styled-button"
+                @onclick="PrintSelectedRecipe"
+                disabled="@(SelectedRecipe == null)">
+            Print Recipe
+        </button>
+    </div>
+</div>
