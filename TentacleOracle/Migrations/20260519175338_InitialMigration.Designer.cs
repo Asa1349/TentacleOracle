@@ -10,8 +10,8 @@ using TentacleOracle.Data;
 namespace TentacleOracle.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260519131946_InitialSQLiteMigration")]
-    partial class InitialSQLiteMigration
+    [Migration("20260519175338_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
