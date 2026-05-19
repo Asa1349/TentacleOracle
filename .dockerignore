@@ -1,0 +1,33 @@
+﻿# Build artifacts
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+
+# Database files (will be mounted via volume)
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+README*
+
+# User files
+**/*.user
+**/*.suo
+**/.DS_Store
+
+# Logs
+**/logs/
+**/*.log
+
+# Test files
+**/test/
+**/tests/

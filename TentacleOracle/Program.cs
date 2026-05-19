@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using TentacleOracle;
 using TentacleOracle.Components;
 using TentacleOracle.Data;
 using TentacleOracle.Services;
@@ -50,7 +48,6 @@ else
 }
 
 app.UseHttpsRedirection();
-
 
 app.UseAntiforgery();
 

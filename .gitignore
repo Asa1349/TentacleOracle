@@ -17,10 +17,13 @@ riderModule.iml
 *.userosscache
 *.sln.docstates
 
-# SQLite databases (local)
+# SQLite databases
 *.db
 *.db-shm
 *.db-wal
+
+# Data directory
+!data/.gitkeep
 
 # Visual Studio cache/options
 .vs/
