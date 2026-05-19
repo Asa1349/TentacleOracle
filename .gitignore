@@ -1,5 +1,32 @@
+# Build results
 bin/
 obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# JetBrains Rider / IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# SQLite databases (local)
+*.db
+*.db-shm
+*.db-wal
+
+# Visual Studio cache/options
+.vs/
+
+# .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
