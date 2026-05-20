@@ -21,6 +21,8 @@ riderModule.iml
 *.db
 *.db-shm
 *.db-wal
+*.db-journal
+*.backup
 
 # Data directory
 !data/.gitkeep

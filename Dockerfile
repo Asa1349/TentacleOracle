@@ -30,7 +30,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 
 # Create database directory
-RUN mkdir -p /app/data
+RUN mkdir -p /app/database
 
 # Copy published app
 COPY --from=build /app/publish .

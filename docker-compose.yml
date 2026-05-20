@@ -16,4 +16,4 @@
       ASPNETCORE_URLS: http://+:8080
 
     volumes:
-      - ./TentacleOracle/data:/app/data
+      - ./TentacleOracle/database:/app/database

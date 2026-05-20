@@ -11,6 +11,12 @@
 .git/
 .gitignore
 
+# Database files
+**/*.db-shm
+**/*.db-wal
+**/*.db-journal
+**/*.backup
+
 # Logs
 **/*.log
 
