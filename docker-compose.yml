@@ -1,17 +1,19 @@
-﻿version: '3.8'
-
-services:
+﻿services:
   tentacleoracle:
     build:
       context: .
       dockerfile: Dockerfile
+
     container_name: tentacleoracle
-    ports:
-      - "8080:8080"
-    volumes:
-      # Mount data directory for SQLite database persistence
-      - ./TentacleOracle/data:/app/data
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
+
     restart: unless-stopped
+
+    ports:
+      - "7070:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+
+    volumes:
+      - ./TentacleOracle/data:/app/data
