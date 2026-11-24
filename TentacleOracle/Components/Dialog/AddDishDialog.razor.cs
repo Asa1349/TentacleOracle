@@ -10,6 +10,8 @@ namespace TentacleOracle.Components.Dialog;
 
 public partial class AddDishDialog : ComponentBase
 {
+    private const string DropdownChevron = "<path d=\"M6 9l6 6 6-6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>";
+
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = null!;
 
@@ -28,6 +30,16 @@ public partial class AddDishDialog : ComponentBase
     private string? _error;
 
     protected override void OnInitialized() => _editContext = new EditContext(_model);
+
+    private Task<IEnumerable<string>> SearchCategoriesAsync(string? searchText, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var search = searchText?.Trim();
+        IEnumerable<string> matches = string.IsNullOrEmpty(search)
+            ? Categories
+            : Categories.Where(category => category.Contains(search, StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(matches);
+    }
 
     private void Clear()
     {
@@ -51,7 +63,7 @@ public partial class AddDishDialog : ComponentBase
         var dish = new Dish
         {
             Name = _model.Name.Trim(),
-            Category = _model.Category.Trim(),
+            Category = (_model.Category ?? string.Empty).Trim(),
             Kcal = _model.Kcal,
             Effort = (int)_model.Effort,
             RatingA = (int)_model.RatingA,

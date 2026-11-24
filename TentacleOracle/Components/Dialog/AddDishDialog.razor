@@ -21,13 +21,22 @@
                         </div>
                         <div class="form-field">
                             <label for="dish-category">Category</label>
-                            <InputText id="dish-category" @bind-Value="_model.Category" list="dish-categories" placeholder="None" maxlength="100" />
-                            <datalist id="dish-categories">
-                                @foreach (var category in Categories)
-                                {
-                                    <option value="@category"></option>
-                                }
-                            </datalist>
+                            <MudAutocomplete T="string" InputId="dish-category"
+                                             Class="dish-dropdown category-autocomplete"
+                                             PopoverClass="dish-dropdown-popover"
+                                             OpenIcon="@DropdownChevron"
+                                             CloseIcon="@DropdownChevron"
+                                             @bind-Value="_model.Category"
+                                             For="@(() => _model.Category)"
+                                             SearchFunc="SearchCategoriesAsync"
+                                             MinCharacters="0" MaxItems="@((int?)null)"
+                                             OpenOnFocus="true" Strict="false"
+                                             CoerceText="false" CoerceValue="true"
+                                             Immediate="true" DebounceInterval="0"
+                                             ResetValueOnEmptyText="true" Clearable="false"
+                                             Disabled="@_saving" MaxLength="100"
+                                             Placeholder="None" Underline="false"
+                                             Margin="Margin.Dense" />
                             <ValidationMessage For="@(() => _model.Category)" />
                         </div>
                         <div class="form-field">
@@ -37,34 +46,49 @@
                         </div>
                         <div class="form-field">
                             <label for="dish-effort">Effort</label>
-                            <InputSelect id="dish-effort" @bind-Value="_model.Effort">
+                            <MudSelect T="DishEffort" InputId="dish-effort" @bind-Value="_model.Effort"
+                                       ToStringFunc="@(value => value.GetDisplayName())"
+                                       For="@(() => _model.Effort)" Class="dish-dropdown"
+                                       PopoverClass="dish-dropdown-popover" Underline="false" Margin="Margin.Dense"
+                                       OpenIcon="@DropdownChevron" CloseIcon="@DropdownChevron"
+                                       Disabled="@_saving" Dense="true">
                                 @foreach (var value in Enum.GetValues<DishEffort>())
                                 {
-                                    <option value="@value">@value.GetDisplayName()</option>
+                                    <MudSelectItem Value="@value">@value.GetDisplayName()</MudSelectItem>
                                 }
-                            </InputSelect>
+                            </MudSelect>
                             <ValidationMessage For="@(() => _model.Effort)" />
                         </div>
                     </div>
                     <div class="ratings-column">
                         <div class="form-field">
                             <label for="dish-rating-alex">Rating A</label>
-                            <InputSelect id="dish-rating-alex" @bind-Value="_model.RatingA">
+                            <MudSelect T="DishRating" InputId="dish-rating-alex" @bind-Value="_model.RatingA"
+                                       ToStringFunc="@(value => value.GetDisplayName())"
+                                       For="@(() => _model.RatingA)" Class="dish-dropdown"
+                                       PopoverClass="dish-dropdown-popover" Underline="false" Margin="Margin.Dense"
+                                       OpenIcon="@DropdownChevron" CloseIcon="@DropdownChevron"
+                                       Disabled="@_saving" Dense="true">
                                 @foreach (var value in Enum.GetValues<DishRating>())
                                 {
-                                    <option value="@value">@value.GetDisplayName()</option>
+                                    <MudSelectItem Value="@value">@value.GetDisplayName()</MudSelectItem>
                                 }
-                            </InputSelect>
+                            </MudSelect>
                             <ValidationMessage For="@(() => _model.RatingA)" />
                         </div>
                         <div class="form-field">
                             <label for="dish-rating-rainer">Rating B</label>
-                            <InputSelect id="dish-rating-rainer" @bind-Value="_model.RatingR">
+                            <MudSelect T="DishRating" InputId="dish-rating-rainer" @bind-Value="_model.RatingR"
+                                       ToStringFunc="@(value => value.GetDisplayName())"
+                                       For="@(() => _model.RatingR)" Class="dish-dropdown"
+                                       PopoverClass="dish-dropdown-popover" Underline="false" Margin="Margin.Dense"
+                                       OpenIcon="@DropdownChevron" CloseIcon="@DropdownChevron"
+                                       Disabled="@_saving" Dense="true">
                                 @foreach (var value in Enum.GetValues<DishRating>())
                                 {
-                                    <option value="@value">@value.GetDisplayName()</option>
+                                    <MudSelectItem Value="@value">@value.GetDisplayName()</MudSelectItem>
                                 }
-                            </InputSelect>
+                            </MudSelect>
                             <ValidationMessage For="@(() => _model.RatingR)" />
                         </div>
                     </div>
