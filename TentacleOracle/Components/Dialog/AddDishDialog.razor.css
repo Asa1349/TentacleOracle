@@ -1,0 +1,120 @@
+.add-dish-dialog {
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+}
+
+.dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 12px;
+    background: var(--color-header);
+    color: var(--color-accent);
+}
+
+.dialog-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.close-button {
+    border: 0;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+.dialog-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(120px, .8fr);
+    gap: 40px;
+    min-width: 0;
+    margin: 0;
+    padding: 32px 28px 44px;
+    border: 0;
+}
+
+.details-column,
+.ratings-column {
+    display: flex;
+    flex-direction: column;
+    gap: 42px;
+    min-width: 0;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-field label {
+    color: var(--color-accent);
+}
+
+.form-field ::deep input,
+.form-field ::deep select {
+    width: 100%;
+    min-width: 0;
+    padding: 5px 8px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font: inherit;
+    color-scheme: dark;
+}
+
+.form-field ::deep input:focus,
+.form-field ::deep select:focus,
+button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.form-field ::deep .validation-message,
+.save-error {
+    color: #ffb4ab;
+    font-size: .85rem;
+}
+
+.form-field ::deep .invalid {
+    border-color: #ffb4ab;
+}
+
+.dialog-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 16px;
+}
+
+.dialog-actions .styled-button {
+    margin: 0;
+    box-shadow: none;
+    font-weight: 400;
+}
+
+.save-error {
+    margin: 0;
+    padding: 0 28px 20px;
+}
+
+@media (max-width: 600px) {
+    .dialog-fields {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+        padding: 24px;
+    }
+
+    .details-column,
+    .ratings-column {
+        gap: 20px;
+    }
+
+    .dialog-actions {
+        padding-top: 0;
+    }
+}

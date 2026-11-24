@@ -1,0 +1,84 @@
+@namespace TentacleOracle.Components.Dialog
+@using TentacleOracle.Models.Enums
+@using TentacleOracle.Extensions
+
+<MudDialog Style="background: var(--color-background); color: var(--color-text-secondary);" ContentClass="pa-0">
+    <DialogContent>
+        <div class="add-dish-dialog" aria-labelledby="add-dish-title">
+            <header class="dialog-header">
+                <h2 id="add-dish-title">Add Dish</h2>
+                <button type="button" class="close-button" aria-label="Close dialog" @onclick="Cancel" disabled="@_saving">×</button>
+            </header>
+
+            <EditForm @key="_editContext" EditContext="_editContext" OnValidSubmit="SaveAsync" FormName="AddDish">
+                <DataAnnotationsValidator />
+                <fieldset class="dialog-fields" disabled="@_saving">
+                    <div class="details-column">
+                        <div class="form-field">
+                            <label for="dish-name">Name</label>
+                            <InputText id="dish-name" @bind-Value="_model.Name" maxlength="100" autofocus />
+                            <ValidationMessage For="@(() => _model.Name)" />
+                        </div>
+                        <div class="form-field">
+                            <label for="dish-category">Category</label>
+                            <InputText id="dish-category" @bind-Value="_model.Category" list="dish-categories" placeholder="None" maxlength="100" />
+                            <datalist id="dish-categories">
+                                @foreach (var category in Categories)
+                                {
+                                    <option value="@category"></option>
+                                }
+                            </datalist>
+                            <ValidationMessage For="@(() => _model.Category)" />
+                        </div>
+                        <div class="form-field">
+                            <label for="dish-kcal">Calories / Serving</label>
+                            <InputNumber id="dish-kcal" @bind-Value="_model.Kcal" min="0" />
+                            <ValidationMessage For="@(() => _model.Kcal)" />
+                        </div>
+                        <div class="form-field">
+                            <label for="dish-effort">Effort</label>
+                            <InputSelect id="dish-effort" @bind-Value="_model.Effort">
+                                @foreach (var value in Enum.GetValues<DishEffort>())
+                                {
+                                    <option value="@value">@value.GetDisplayName()</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => _model.Effort)" />
+                        </div>
+                    </div>
+                    <div class="ratings-column">
+                        <div class="form-field">
+                            <label for="dish-rating-alex">Rating A</label>
+                            <InputSelect id="dish-rating-alex" @bind-Value="_model.RatingA">
+                                @foreach (var value in Enum.GetValues<DishRating>())
+                                {
+                                    <option value="@value">@value.GetDisplayName()</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => _model.RatingA)" />
+                        </div>
+                        <div class="form-field">
+                            <label for="dish-rating-rainer">Rating B</label>
+                            <InputSelect id="dish-rating-rainer" @bind-Value="_model.RatingR">
+                                @foreach (var value in Enum.GetValues<DishRating>())
+                                {
+                                    <option value="@value">@value.GetDisplayName()</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => _model.RatingR)" />
+                        </div>
+                    </div>
+                    <div class="dialog-actions">
+                        <button type="submit" class="styled-button">@(_saving ? "Saving…" : "Save")</button>
+                        <button type="button" class="styled-button" @onclick="Clear">Clear</button>
+                    </div>
+                </fieldset>
+                @if (_error != null)
+                {
+                    <p class="save-error" role="alert">@_error</p>
+                }
+            </EditForm>
+        </div>
+    </DialogContent>
+</MudDialog>
+

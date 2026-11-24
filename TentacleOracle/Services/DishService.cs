@@ -22,7 +22,16 @@ public class DishService : IDishService
     public async Task AddDishAsync(Dish dish)
     {
         _db.Dishes.Add(dish);
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch
+        {
+            // Ein erneuter Versuch darf den fehlgeschlagenen Insert nicht zusätzlich speichern.
+            _db.Entry(dish).State = EntityState.Detached;
+            throw;
+        }
     }
 
     public async Task UpdateDishAsync(Dish dish)
