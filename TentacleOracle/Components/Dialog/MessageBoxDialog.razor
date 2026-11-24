@@ -1,0 +1,30 @@
+@using TentacleOracle.Models.Enums
+@namespace TentacleOracle.Components.Dialog
+
+<MudDialog
+    Style="background: var(--color-background); color: var(--color-text-secondary); width: 560px; max-width: calc(100vw - 32px);"
+    ContentClass="pa-0" DefaultFocus="DefaultFocus.LastChild">
+    <DialogContent>
+        <div class="message-box" aria-labelledby="message-box-title" aria-describedby="message-box-text">
+            <header class="dialog-header">
+                <h2 id="message-box-title">@Title</h2>
+                <button type="button" class="close-button" aria-label="Close dialog" @onclick="Cancel">×</button>
+            </header>
+            <div class="dialog-body">
+                <p id="message-box-text" class="message-text">@Text</p>
+                <div class="dialog-actions">
+                    @if (Buttons == MessageBoxButtons.YesNo)
+                    {
+                        <button type="button" class="styled-button" @onclick="Confirm">Yes</button>
+                        <button type="button" class="styled-button" @onclick="Decline">No</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="styled-button" @onclick="Confirm">OK</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </DialogContent>
+</MudDialog>
+

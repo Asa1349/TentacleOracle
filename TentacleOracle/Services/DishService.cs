@@ -13,11 +13,15 @@ public class DishService : IDishService
         _db = db;
     }
 
-    public async Task<List<Dish>> GetDishesAsync() =>
-        await _db.Dishes.ToListAsync();
+    public async Task<List<Dish>> GetDishesAsync()
+    {
+        return await _db.Dishes.ToListAsync();
+    }
 
     public async Task<Dish?> GetDishByIdAsync(int id)
-        => await _db.Dishes.FindAsync(id);
+    {
+        return await _db.Dishes.FindAsync(id);
+    }
 
     public async Task AddDishAsync(Dish dish)
     {
@@ -60,8 +64,19 @@ public class DishService : IDishService
         var dish = await _db.Dishes.FindAsync(id);
         if (dish != null)
         {
-            _db.Dishes.Remove(dish);
-            await _db.SaveChangesAsync();
+            var entry = _db.Entry(dish);
+            var previousState = entry.State;
+            try
+            {
+                _db.Dishes.Remove(dish);
+                await _db.SaveChangesAsync();
+            }
+            catch
+            {
+                // Do not leave a failed deletion pending for a later save.
+                entry.State = previousState;
+                throw;
+            }
         }
     }
 }

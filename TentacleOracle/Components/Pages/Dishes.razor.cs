@@ -34,6 +34,12 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
         StateHasChanged();
     }
 
+    private void OnDishDeleted(int dishId)
+    {
+        _dishes?.RemoveAll(dish => dish.Id == dishId);
+        StateHasChanged();
+    }
+
     #region Overrides
 
     protected override async Task OnInitializedAsync()
@@ -42,6 +48,7 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
         DishStateService.OnChange += StateHasChanged;
         DishStateService.DishAdded += OnDishAdded;
         DishStateService.DishUpdated += OnDishUpdated;
+        DishStateService.DishDeleted += OnDishDeleted;
         await LoadDishes();
     }
 
@@ -50,6 +57,7 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
         DishStateService.OnChange -= StateHasChanged;
         DishStateService.DishAdded -= OnDishAdded;
         DishStateService.DishUpdated -= OnDishUpdated;
+        DishStateService.DishDeleted -= OnDishDeleted;
         base.Dispose();
     }
 

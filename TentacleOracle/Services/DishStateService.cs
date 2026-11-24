@@ -22,6 +22,8 @@ public class DishStateService
 
     public event Action<Dish>? DishUpdated;
 
+    public event Action<int>? DishDeleted;
+
     public void NotifyDishAdded(Dish dish)
     {
         DishAdded?.Invoke(dish);
@@ -35,5 +37,16 @@ public class DishStateService
         NotifyStateChanged();
     }
 
-    private void NotifyStateChanged() => OnChange?.Invoke();
+    public void NotifyDishDeleted(int dishId)
+    {
+        if (_selectedDish?.Id == dishId) _selectedDish = null;
+
+        DishDeleted?.Invoke(dishId);
+        NotifyStateChanged();
+    }
+
+    private void NotifyStateChanged()
+    {
+        OnChange?.Invoke();
+    }
 }

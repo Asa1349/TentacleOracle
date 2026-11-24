@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using TentacleOracle.Components.Dialog;
+using TentacleOracle.Extensions;
 using TentacleOracle.Models;
+using TentacleOracle.Models.Enums;
 using TentacleOracle.Services;
 
 namespace TentacleOracle.Components.Controls;
@@ -15,6 +17,8 @@ public partial class DishesControls : ComponentBase, IDisposable
     [Inject] protected DishStateService DishStateService { get; set; } = null!;
 
     [Inject] protected IDialogService DialogService { get; set; } = null!;
+
+    [Inject] private ILogger<DishesControls> Logger { get; set; } = null!;
 
     private Dish? SelectedDish => DishStateService.SelectedDish;
 
@@ -80,12 +84,34 @@ public partial class DishesControls : ComponentBase, IDisposable
 
     private async Task DeleteSelectedDish()
     {
-        if (SelectedDish == null) return;
+        if (_dishDialogOpen || SelectedDish is not { } dish) return;
+        _dishDialogOpen = true;
 
-        // TODO: Confirmation Dialog
+        try
+        {
+            var message = $"Are you sure you want to remove the dish '{dish.Name}'?";
+            var confirmed = await DialogService.ShowMessageAsync(MessageBoxType.Warning,
+                message, MessageBoxButtons.YesNo);
+            if (confirmed != true) return;
 
-        await DishService.DeleteDishAsync(SelectedDish.Id);
-        DishStateService.SelectedDish = null;
+            try
+            {
+                await DishService.DeleteDishAsync(dish.Id);
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Could not delete dish {DishId}.", dish.Id);
+                var errorMessage = $"The dish '{dish.Name}' could not be deleted. Please try again.";
+                await DialogService.ShowMessageAsync(MessageBoxType.Error, errorMessage);
+                return;
+            }
+
+            DishStateService.NotifyDishDeleted(dish.Id);
+        }
+        finally
+        {
+            _dishDialogOpen = false;
+        }
     }
 
 
