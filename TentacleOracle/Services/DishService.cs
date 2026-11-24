@@ -1,6 +1,6 @@
-﻿using TentacleOracle.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TentacleOracle.Data;
+using TentacleOracle.Models;
 
 namespace TentacleOracle.Services;
 
@@ -12,7 +12,7 @@ public class DishService : IDishService
     {
         _db = db;
     }
-    
+
     public async Task<List<Dish>> GetDishesAsync() =>
         await _db.Dishes.ToListAsync();
 
@@ -28,7 +28,7 @@ public class DishService : IDishService
         }
         catch
         {
-            // Ein erneuter Versuch darf den fehlgeschlagenen Insert nicht zusätzlich speichern.
+            // Prevent a later retry from persisting the failed insert as well.
             _db.Entry(dish).State = EntityState.Detached;
             throw;
         }
@@ -36,8 +36,23 @@ public class DishService : IDishService
 
     public async Task UpdateDishAsync(Dish dish)
     {
-        _db.Dishes.Update(dish);
-        await _db.SaveChangesAsync();
+        var existing = await _db.Dishes.FindAsync(dish.Id)
+                       ?? throw new InvalidOperationException($"Dish {dish.Id} no longer exists.");
+        var entry = _db.Entry(existing);
+        var previousValues = entry.CurrentValues.Clone();
+
+        try
+        {
+            entry.CurrentValues.SetValues(dish);
+            await _db.SaveChangesAsync();
+        }
+        catch
+        {
+            // Keep failed edits out of the UI and subsequent saves.
+            entry.CurrentValues.SetValues(previousValues);
+            entry.State = EntityState.Unchanged;
+            throw;
+        }
     }
 
     public async Task DeleteDishAsync(int id)

@@ -8,13 +8,12 @@ namespace TentacleOracle.Components.Pages;
 
 public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 {
-    [Inject]
-    protected IDishService DishService { get; set; } = null!;
-    [Inject]
-    protected DishStateService DishStateService { get; set; } = null!;
-    
     private List<Dish>? _dishes;
-    
+
+    [Inject] protected IDishService DishService { get; set; } = null!;
+
+    [Inject] protected DishStateService DishStateService { get; set; } = null!;
+
     private async Task LoadDishes()
     {
         _dishes = await DishService.GetDishesAsync();
@@ -27,6 +26,14 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
         StateHasChanged();
     }
 
+    private void OnDishUpdated(Dish dish)
+    {
+        var index = _dishes?.FindIndex(existing => existing.Id == dish.Id) ?? -1;
+        if (index < 0) return;
+        _dishes![index] = dish;
+        StateHasChanged();
+    }
+
     #region Overrides
 
     protected override async Task OnInitializedAsync()
@@ -34,16 +41,17 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
         await base.OnInitializedAsync();
         DishStateService.OnChange += StateHasChanged;
         DishStateService.DishAdded += OnDishAdded;
+        DishStateService.DishUpdated += OnDishUpdated;
         await LoadDishes();
     }
-    
+
     public override void Dispose()
     {
         DishStateService.OnChange -= StateHasChanged;
         DishStateService.DishAdded -= OnDishAdded;
+        DishStateService.DishUpdated -= OnDishUpdated;
         base.Dispose();
     }
-    
+
     #endregion
-    
 }

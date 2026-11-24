@@ -8,29 +8,36 @@ namespace TentacleOracle.Components.Controls;
 
 public partial class DishesControls : ComponentBase, IDisposable
 {
-    [Inject]
-    protected IDishService DishService { get; set; } = null!;
-    [Inject]
-    protected DishStateService DishStateService { get; set; } = null!;
-    [Inject]
-    protected NavigationManager Navigation { get; set; } = null!;
-    [Inject]
-    protected IDialogService DialogService { get; set; } = null!;
+    private bool _dishDialogOpen;
+
+    [Inject] protected IDishService DishService { get; set; } = null!;
+
+    [Inject] protected DishStateService DishStateService { get; set; } = null!;
+
+    [Inject] protected IDialogService DialogService { get; set; } = null!;
 
     private Dish? SelectedDish => DishStateService.SelectedDish;
-    private bool _addDialogOpen;
 
-   private void GenerateWeeklyPlan()
+    private void GenerateWeeklyPlan()
     {
         // TODO: Implement
     }
-    
-    private async Task AddDish()
-    {
-        if (_addDialogOpen) return;
-        _addDialogOpen = true;
 
-        // TODO: Auslagern
+    private Task AddDish()
+    {
+        return ShowDishDialogAsync();
+    }
+
+    private async Task EditSelectedDish()
+    {
+        if (SelectedDish is { } dish) await ShowDishDialogAsync(dish);
+    }
+
+    private async Task ShowDishDialogAsync(Dish? dishToEdit = null)
+    {
+        if (_dishDialogOpen) return;
+        _dishDialogOpen = true;
+
         try
         {
             var dishes = await DishService.GetDishesAsync();
@@ -40,9 +47,10 @@ public partial class DishesControls : ComponentBase, IDisposable
                 .OrderBy(category => category)
                 .ToList();
 
-            var parameters = new DialogParameters<AddDishDialog>
+            var parameters = new DialogParameters<DishDialog>
             {
-                { dialog => dialog.Categories, categories }
+                { dialog => dialog.Categories, categories },
+                { dialog => dialog.DishToEdit, dishToEdit }
             };
             var options = new DialogOptions
             {
@@ -53,47 +61,45 @@ public partial class DishesControls : ComponentBase, IDisposable
                 CloseOnEscapeKey = false
             };
 
-            var dialog = await DialogService.ShowAsync<AddDishDialog>("Add Dish", parameters, options);
+            var title = dishToEdit == null ? "Add Dish" : "Edit Dish";
+            var dialog = await DialogService.ShowAsync<DishDialog>(title, parameters, options);
             var result = await dialog.Result;
-            if (result is { Canceled: false, Data: Dish addedDish })
+            if (result is { Canceled: false, Data: Dish savedDish })
             {
-                DishStateService.NotifyDishAdded(addedDish);
+                if (dishToEdit == null)
+                    DishStateService.NotifyDishAdded(savedDish);
+                else
+                    DishStateService.NotifyDishUpdated(savedDish);
             }
         }
         finally
         {
-            _addDialogOpen = false;
+            _dishDialogOpen = false;
         }
-    }
-
-    private void EditSelectedDish()
-    {
-        if (SelectedDish == null) return;
-        Navigation.NavigateTo($"/dishes/edit/{SelectedDish.Id}");
     }
 
     private async Task DeleteSelectedDish()
     {
         if (SelectedDish == null) return;
-        
+
         // TODO: Confirmation Dialog
-        
+
         await DishService.DeleteDishAsync(SelectedDish.Id);
         DishStateService.SelectedDish = null;
     }
 
-    
+
     #region Overrides
-    
+
     protected override void OnInitialized()
     {
         DishStateService.OnChange += StateHasChanged;
     }
-    
+
     public void Dispose()
     {
         DishStateService.OnChange -= StateHasChanged;
     }
-    
+
     #endregion
 }

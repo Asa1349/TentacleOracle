@@ -1,4 +1,4 @@
-.add-dish-dialog {
+.dish-dialog {
     background: var(--color-background);
     color: var(--color-text-secondary);
 }
@@ -188,3 +188,4 @@ button:focus-visible {
         padding-top: 0;
     }
 }
+
