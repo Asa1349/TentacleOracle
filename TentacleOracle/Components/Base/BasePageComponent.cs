@@ -1,27 +1,21 @@
 ﻿using Microsoft.AspNetCore.Components;
 using TentacleOracle.Services;
 
-namespace TentacleOracle.Base;
+namespace TentacleOracle.Components.Base;
 
 
 public abstract class BasePageComponent : ComponentBase, IDisposable
 {
-    [Inject] protected NavigationStateService NavStateService { get; set; } = default!;
+    [Inject] protected NavigationStateService NavStateService { get; set; } = null!;
     
     protected override void OnInitialized()
     {
-        NavStateService.ClearControls(); 
+        NavStateService.SetNoControls(this);
         base.OnInitialized();
     }
     
-    protected override async Task OnInitializedAsync()
-    {
-        NavStateService.ClearControls(); 
-        await base.OnInitializedAsync();
-    }
-
     public virtual void Dispose()
     {
-        NavStateService.ClearControls();
+        NavStateService.ClearControls(this);
     }
 }

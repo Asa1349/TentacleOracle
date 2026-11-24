@@ -1,4 +1,4 @@
-﻿using TentacleOracle.Base;
+﻿using TentacleOracle.Components.Base;
 using TentacleOracle.Components.Controls;
 
 namespace TentacleOracle.Components.Pages;

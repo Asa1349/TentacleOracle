@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using TentacleOracle.Base;
+using TentacleOracle.Components.Base;
 using TentacleOracle.Components.Controls;
 using TentacleOracle.Models;
 using TentacleOracle.Services;
