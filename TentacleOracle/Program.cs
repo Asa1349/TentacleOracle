@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using TentacleOracle.Components;
@@ -24,8 +25,16 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
+var sqliteBuilder = new SqliteConnectionStringBuilder(connectionString);
+if (!string.IsNullOrWhiteSpace(sqliteBuilder.DataSource) && !Path.IsPathRooted(sqliteBuilder.DataSource))
+{
+    sqliteBuilder.DataSource = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, sqliteBuilder.DataSource));
+}
+
+var resolvedConnectionString = sqliteBuilder.ToString();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlite(resolvedConnectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddMudServices();
