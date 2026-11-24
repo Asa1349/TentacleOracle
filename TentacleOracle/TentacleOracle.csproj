@@ -70,7 +70,6 @@
       <_ContentIncludedByDefault Remove="Controls\DishesControls.razor" />
       <_ContentIncludedByDefault Remove="Controls\RecipesControls.razor" />
       <_ContentIncludedByDefault Remove="Controls\SettingsControls.razor" />
-      <_ContentIncludedByDefault Remove="Dialog\SimpleDialog.razor" />
     </ItemGroup>
 
 </Project>

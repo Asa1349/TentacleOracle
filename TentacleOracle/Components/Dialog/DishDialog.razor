@@ -7,8 +7,9 @@
         <div class="dish-dialog" aria-labelledby="dish-dialog-title">
             <header class="dialog-header">
                 <h2 id="dish-dialog-title">@(IsEditing ? "Edit Dish" : "Add Dish")</h2>
-                <button type="button" class="close-button" aria-label="Close dialog" @onclick="Cancel"
-                        disabled="@_saving">×
+                <button type="button" class="styled-button styled-button--icon" aria-label="Close dialog"
+                        @onclick="Cancel"
+                        disabled="@_saving">X
                 </button>
             </header>
 

@@ -2,21 +2,38 @@
 @inherits TentacleOracle.Components.Base.BasePageWithControlsComponent<TentacleOracle.Components.Controls.DishesControls>
 @attribute [StreamRendering]
 
-<h2>Dishes</h2>
+<div class="dishes-page">
+    <h2>Dishes</h2>
 
-<div class="table-container">
-    <table class="content">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>kcal/Serving</th>
-            <th>Effort</th>
-            <th>Rating</th>
-        </tr>
-        </thead>
-        <tbody>
-        <DishesTableInteractive Dishes="_dishes" />
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table class="content">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>kcal/Serving</th>
+                <th>Effort</th>
+                <th>Rating</th>
+            </tr>
+            </thead>
+            <tbody>
+            <DishesTableInteractive Dishes="_dishes"/>
+            </tbody>
+        </table>
+    </div>
+
+    <section class="dishes-bottom-section" aria-label="Generated meal list">
+        <div class="panel-actions" role="group" aria-label="Panel controls">
+            <button type="button" class="styled-button styled-button--icon" aria-label="Up" title="Up" disabled>
+                <span class="panel-arrow panel-arrow-up" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="styled-button styled-button--icon" aria-label="Down" title="Down" disabled>
+                <span class="panel-arrow panel-arrow-down" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="styled-button styled-button--icon" aria-label="Clear" title="Clear" disabled>
+                <span class="panel-clear-symbol" aria-hidden="true">X</span>
+            </button>
+        </div>
+        <div class="dishes-bottom-box"></div>
+    </section>
 </div>
