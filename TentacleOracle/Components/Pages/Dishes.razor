@@ -34,6 +34,29 @@
                 <span class="panel-clear-symbol" aria-hidden="true">X</span>
             </button>
         </div>
-        <div class="dishes-bottom-box"></div>
+        <div class="dishes-bottom-box" aria-live="polite" aria-atomic="true">
+            @if (_generatedDishes is { Count: > 0 })
+            {
+                <ul class="generated-meal-list" role="listbox" aria-label="Generated meal list"
+                    tabindex="0" aria-activedescendant="@SelectedGeneratedDishElementId"
+                    @onkeydown="HandleMealPlanKeyDown">
+                    @foreach (var dish in _generatedDishes)
+                    {
+                        var isSelected = dish.Id == _selectedGeneratedDishId;
+                        <li @key="dish.Id" id="@($"generated-dish-{dish.Id}")" role="option"
+                            aria-selected="@(isSelected ? "true" : "false")"
+                            class="generated-meal-item @(isSelected ? "is-selected" : "")"
+                            @onclick="() => SelectGeneratedDish(dish)">
+                            <span class="generated-meal-name">@dish.Name</span>
+                            <span class="generated-meal-calories">(@dish.Kcal kcal)</span>
+                        </li>
+                    }
+                </ul>
+            }
+            else if (_generatedDishes != null)
+            {
+                <p class="empty-meal-list">No meal plan generated yet.</p>
+            }
+        </div>
     </section>
 </div>

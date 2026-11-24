@@ -24,6 +24,13 @@ public class DishStateService
 
     public event Action<int>? DishDeleted;
 
+    public event Action? MealPlanGenerationRequested;
+
+    public void RequestMealPlanGeneration()
+    {
+        MealPlanGenerationRequested?.Invoke();
+    }
+
     public void NotifyDishAdded(Dish dish)
     {
         DishAdded?.Invoke(dish);

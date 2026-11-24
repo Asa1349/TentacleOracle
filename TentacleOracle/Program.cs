@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using TentacleOracle.BusinessLogic;
 using TentacleOracle.Components;
 using TentacleOracle.Data;
 using TentacleOracle.Services;
@@ -28,7 +29,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var sqliteBuilder = new SqliteConnectionStringBuilder(connectionString);
 if (!string.IsNullOrWhiteSpace(sqliteBuilder.DataSource) && !Path.IsPathRooted(sqliteBuilder.DataSource))
 {
-    sqliteBuilder.DataSource = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, sqliteBuilder.DataSource));
+    sqliteBuilder.DataSource =
+        Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, sqliteBuilder.DataSource));
 }
 
 var resolvedConnectionString = sqliteBuilder.ToString();
@@ -39,6 +41,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<IDishService, DishService>();
+builder.Services.AddScoped<IMealPlanGenerator, MealPlanGenerator>();
 builder.Services.AddScoped<DishStateService>();
 builder.Services.AddScoped<NavigationStateService>();
 
@@ -48,11 +51,11 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
-    
+
     try
     {
         var dbContext = services.GetRequiredService<AppDbContext>();
-        
+
         var dbConnectionString = dbContext.Database.GetConnectionString();
         if (!string.IsNullOrEmpty(dbConnectionString))
         {
@@ -66,9 +69,9 @@ using (var scope = app.Services.CreateScope())
                 {
                     dbPath = dbPath[..semicolonIndex];
                 }
-                
+
                 var directory = Path.GetDirectoryName(dbPath);
-                
+
                 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
@@ -76,7 +79,7 @@ using (var scope = app.Services.CreateScope())
                 }
             }
         }
-        
+
         dbContext.Database.Migrate();
         logger.LogInformation("Database migrations applied successfully.");
     }

@@ -24,7 +24,7 @@ public partial class DishesControls : ComponentBase, IDisposable
 
     private void GenerateWeeklyPlan()
     {
-        // TODO: Implement
+        DishStateService.RequestMealPlanGeneration();
     }
 
     private Task AddDish()
