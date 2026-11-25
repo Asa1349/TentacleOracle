@@ -7,13 +7,13 @@ public partial class SettingsControls : ComponentBase
 {
     [Inject] private SettingsStateService SettingsState { get; set; } = null!;
 
-    private void SaveSettings()
+    private Task SaveSettings()
     {
-        SettingsState.RequestSave();
+        return SettingsState.RequestSaveAsync();
     }
 
-    private void ResetChanges()
+    private Task ResetChanges()
     {
-        SettingsState.RequestReset();
+        return SettingsState.RequestResetAsync();
     }
 }

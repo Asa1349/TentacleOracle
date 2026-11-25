@@ -35,7 +35,7 @@ if (!string.IsNullOrWhiteSpace(sqliteBuilder.DataSource) && !Path.IsPathRooted(s
 
 var resolvedConnectionString = sqliteBuilder.ToString();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlite(resolvedConnectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();

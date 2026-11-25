@@ -11,6 +11,9 @@ namespace TentacleOracle.Components.Controls;
 public partial class DishesControls : ComponentBase, IDisposable
 {
     private bool _dishDialogOpen;
+    private bool _generating;
+
+    [Inject] private SettingsStateService SettingsState { get; set; } = null!;
 
     [Inject] protected IDishService DishService { get; set; } = null!;
 
@@ -22,9 +25,25 @@ public partial class DishesControls : ComponentBase, IDisposable
 
     private Dish? SelectedDish => DishStateService.SelectedDish;
 
-    private void GenerateWeeklyPlan()
+    private async Task GenerateMealPlan()
     {
-        DishStateService.RequestMealPlanGeneration();
+        if (_generating || _dishDialogOpen) return;
+        _generating = true;
+        try
+        {
+            await SettingsState.LoadAsync();
+            DishStateService.RequestMealPlanGeneration();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not generate a meal plan.");
+            await DialogService.ShowMessageAsync(MessageBoxType.Error,
+                "The meal plan could not be generated. Please try again.");
+        }
+        finally
+        {
+            _generating = false;
+        }
     }
 
     private Task AddDish()
