@@ -1,0 +1,16 @@
+.mud-tooltip {
+    background-color: var(--color-surface);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-background);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-family: Arial, sans-serif;
+    font-size: .875rem;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.mud-tooltip .mud-tooltip-arrow {
+    color: var(--color-surface);
+}
+

@@ -24,15 +24,24 @@
 
     <section class="dishes-bottom-section" aria-label="Generated meal list">
         <div class="panel-actions" role="group" aria-label="Panel controls">
-            <button type="button" class="styled-button styled-button--icon" aria-label="Up" title="Up" disabled>
-                <span class="panel-arrow panel-arrow-up" aria-hidden="true"></span>
-            </button>
-            <button type="button" class="styled-button styled-button--icon" aria-label="Down" title="Down" disabled>
-                <span class="panel-arrow panel-arrow-down" aria-hidden="true"></span>
-            </button>
-            <button type="button" class="styled-button styled-button--icon" aria-label="Clear" title="Clear" disabled>
-                <span class="panel-clear-symbol" aria-hidden="true">X</span>
-            </button>
+            <MudTooltip Text="Remove from plan">
+                <button type="button" class="styled-button styled-button--icon" aria-label="Remove from plan"
+                        @onclick="RemoveSelectedMeal" disabled="@(!CanRemoveMeal)">
+                    <span class="panel-arrow panel-arrow-up" aria-hidden="true"></span>
+                </button>
+            </MudTooltip>
+            <MudTooltip Text="Add to plan">
+                <button type="button" class="styled-button styled-button--icon" aria-label="Add to plan"
+                        @onclick="AddSelectedDishToMealPlan" disabled="@(!CanAddMeal)">
+                    <span class="panel-arrow panel-arrow-down" aria-hidden="true"></span>
+                </button>
+            </MudTooltip>
+            <MudTooltip Text="Clear plan">
+                <button type="button" class="styled-button styled-button--icon" aria-label="Clear plan"
+                        @onclick="ClearMealPlan" disabled="@(!CanClearMealPlan)">
+                    <span class="panel-clear-symbol" aria-hidden="true">X</span>
+                </button>
+            </MudTooltip>
         </div>
         <div class="dishes-bottom-box" aria-live="polite" aria-atomic="true">
             @if (_generatedDishes is { Count: > 0 })
@@ -40,22 +49,18 @@
                 <ul class="generated-meal-list" role="listbox" aria-label="Generated meal list"
                     tabindex="0" aria-activedescendant="@SelectedGeneratedDishElementId"
                     @onkeydown="HandleMealPlanKeyDown">
-                    @foreach (var dish in _generatedDishes)
+                    @foreach (var entry in _generatedDishes)
                     {
-                        var isSelected = dish.Id == _selectedGeneratedDishId;
-                        <li @key="dish.Id" id="@($"generated-dish-{dish.Id}")" role="option"
+                        var isSelected = entry.Id == _selectedMealPlanEntryId;
+                        <li @key="entry.Id" id="@($"generated-dish-{entry.Id}")" role="option"
                             aria-selected="@(isSelected ? "true" : "false")"
                             class="generated-meal-item @(isSelected ? "is-selected" : "")"
-                            @onclick="() => SelectGeneratedDish(dish)">
-                            <span class="generated-meal-name">@dish.Name</span>
-                            <span class="generated-meal-calories">(@dish.Kcal kcal)</span>
+                            @onclick="() => SelectGeneratedDish(entry)">
+                            <span class="generated-meal-name">@entry.Dish.Name</span>
+                            <span class="generated-meal-calories">(@entry.Dish.Kcal kcal)</span>
                         </li>
                     }
                 </ul>
-            }
-            else if (_generatedDishes != null)
-            {
-                <p class="empty-meal-list">No meal plan generated yet.</p>
             }
         </div>
     </section>

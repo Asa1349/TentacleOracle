@@ -11,13 +11,9 @@ namespace TentacleOracle.Components.Pages;
 public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 {
     private List<Dish>? _dishes;
-    private List<Dish>? _generatedDishes;
-    private int? _selectedGeneratedDishId;
-
-    private string? SelectedGeneratedDishElementId => _selectedGeneratedDishId is { } id
-        ? $"generated-dish-{id}"
-        : null;
-
+    private List<MealPlanEntry>? _generatedDishes;
+    private int _nextMealPlanEntryId;
+    private int? _selectedMealPlanEntryId;
     [Inject] protected IDishService DishService { get; set; } = null!;
 
     [Inject] protected DishStateService DishStateService { get; set; } = null!;
@@ -26,24 +22,60 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 
     [Inject] private SettingsStateService SettingsState { get; set; } = null!;
 
+    private bool CanRemoveMeal => _generatedDishes?.Any(entry => entry.Id == _selectedMealPlanEntryId) == true;
+
+    private bool CanAddMeal => DishStateService.SelectedDish is { } selected
+                               && _dishes?.Any(dish => dish.Id == selected.Id) == true;
+
+    private bool CanClearMealPlan => _generatedDishes is { Count: > 0 };
+
+    private string? SelectedGeneratedDishElementId => _selectedMealPlanEntryId is { } id
+        ? $"generated-dish-{id}"
+        : null;
+
+    private void AddSelectedDishToMealPlan()
+    {
+        if (!CanAddMeal || DishStateService.SelectedDish is not { } selected) return;
+        var dish = _dishes!.First(dish => dish.Id == selected.Id);
+        _generatedDishes ??= [];
+        var entry = new MealPlanEntry(++_nextMealPlanEntryId, dish);
+        _generatedDishes.Add(entry);
+        _selectedMealPlanEntryId = entry.Id;
+    }
+
+    private void RemoveSelectedMeal()
+    {
+        if (!CanRemoveMeal) return;
+        _generatedDishes!.RemoveAll(entry => entry.Id == _selectedMealPlanEntryId);
+        _selectedMealPlanEntryId = null;
+    }
+
+    private void ClearMealPlan()
+    {
+        _generatedDishes = [];
+        _selectedMealPlanEntryId = null;
+    }
+
+
     private void GenerateMealPlan()
     {
         if (_dishes == null) return;
-        _generatedDishes = MealPlanGenerator.Generate(_dishes, SettingsState.MealCount).ToList();
-        _selectedGeneratedDishId = null;
+        _generatedDishes = MealPlanGenerator.Generate(_dishes, SettingsState.MealCount)
+            .Select(dish => new MealPlanEntry(++_nextMealPlanEntryId, dish)).ToList();
+        _selectedMealPlanEntryId = null;
         StateHasChanged();
     }
 
-    private void SelectGeneratedDish(Dish dish)
+    private void SelectGeneratedDish(MealPlanEntry entry)
     {
-        _selectedGeneratedDishId = dish.Id;
+        _selectedMealPlanEntryId = entry.Id;
     }
 
     private void HandleMealPlanKeyDown(KeyboardEventArgs args)
     {
         if (_generatedDishes is not { Count: > 0 }) return;
 
-        var index = _generatedDishes.FindIndex(dish => dish.Id == _selectedGeneratedDishId);
+        var index = _generatedDishes.FindIndex(entry => entry.Id == _selectedMealPlanEntryId);
         var nextIndex = args.Key switch
         {
             "ArrowDown" => Math.Min(index + 1, _generatedDishes.Count - 1),
@@ -74,17 +106,24 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
         var index = _dishes?.FindIndex(existing => existing.Id == dish.Id) ?? -1;
         if (index < 0) return;
         _dishes![index] = dish;
-        var generatedIndex = _generatedDishes?.FindIndex(existing => existing.Id == dish.Id) ?? -1;
-        if (generatedIndex >= 0) _generatedDishes![generatedIndex] = dish;
+        if (_generatedDishes != null)
+            foreach (var entry in _generatedDishes.Where(entry => entry.Dish.Id == dish.Id))
+                entry.Dish = dish;
         StateHasChanged();
     }
 
     private void OnDishDeleted(int dishId)
     {
         _dishes?.RemoveAll(dish => dish.Id == dishId);
-        _generatedDishes?.RemoveAll(dish => dish.Id == dishId);
-        if (_selectedGeneratedDishId == dishId) _selectedGeneratedDishId = null;
+        _generatedDishes?.RemoveAll(entry => entry.Dish.Id == dishId);
+        if (!CanRemoveMeal) _selectedMealPlanEntryId = null;
         StateHasChanged();
+    }
+
+    private sealed class MealPlanEntry(int id, Dish dish)
+    {
+        public int Id { get; } = id;
+        public Dish Dish { get; set; } = dish;
     }
 
     #region Overrides
