@@ -16,6 +16,28 @@ namespace TentacleOracle.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.16");
 
+            modelBuilder.Entity("TentacleOracle.Models.AppSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MealCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(7);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            MealCount = 7
+                        });
+                });
+
             modelBuilder.Entity("TentacleOracle.Models.Dish", b =>
                 {
                     b.Property<int>("Id")

@@ -43,6 +43,7 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<IDishService, DishService>();
 builder.Services.AddScoped<IMealPlanGenerator, MealPlanGenerator>();
 builder.Services.AddScoped<DishStateService>();
+builder.Services.AddScoped<SettingsStateService>();
 builder.Services.AddScoped<NavigationStateService>();
 
 var app = builder.Build();

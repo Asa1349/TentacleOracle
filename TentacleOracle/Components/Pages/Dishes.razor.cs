@@ -24,10 +24,12 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 
     [Inject] protected IMealPlanGenerator MealPlanGenerator { get; set; } = null!;
 
+    [Inject] private SettingsStateService SettingsState { get; set; } = null!;
+
     private void GenerateMealPlan()
     {
         if (_dishes == null) return;
-        _generatedDishes = MealPlanGenerator.Generate(_dishes).ToList();
+        _generatedDishes = MealPlanGenerator.Generate(_dishes, SettingsState.MealCount).ToList();
         _selectedGeneratedDishId = null;
         StateHasChanged();
     }

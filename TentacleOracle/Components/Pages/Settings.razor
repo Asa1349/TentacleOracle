@@ -3,3 +3,17 @@
 
 <h2>Settings</h2>
 
+<EditForm @key="_editContext" EditContext="_editContext" OnValidSubmit="SaveValidSettings" FormName="Settings">
+	<DataAnnotationsValidator/>
+	<div class="settings-field">
+		<label for="meal-count">Number of meals to generate</label>
+		<InputNumber id="meal-count" @bind-Value="_model.MealCount"
+		             min="1" max="28" step="1" aria-describedby="meal-count-help"/>
+		<p id="meal-count-help">Choose 1–28 meals (up to four weeks with one meal per day).</p>
+		<ValidationMessage For="@(() => _model.MealCount)"/>
+	</div>
+	@if (_saved)
+	{
+		<p class="settings-feedback" role="status">Settings saved for this session.</p>
+	}
+</EditForm>
