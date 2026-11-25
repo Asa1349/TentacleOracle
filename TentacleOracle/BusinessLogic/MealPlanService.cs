@@ -26,18 +26,21 @@ public sealed class MealPlanService
     public IReadOnlyList<MealPlanEntry> Entries { get; }
     public int MealCount { get; private set; } = AppSettings.DefaultMealCount;
 
-    public async Task LoadAsync()
+    public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
-        var dishes = await _dishService.GetDishesAsync();
+        var dishes = await _dishService.GetDishesAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
         _dishes.Clear();
         _dishes.AddRange(dishes);
     }
 
     public bool ContainsDish(int dishId) => _dishes.Any(dish => dish.Id == dishId);
 
-    public async Task<MealPlanChangeResult> AddDishAsync(int dishId)
+    public async Task<MealPlanChangeResult> AddDishAsync(int dishId, CancellationToken cancellationToken = default)
     {
-        MealCount = await _settingsService.GetMealCountAsync();
+        var mealCount = await _settingsService.GetMealCountAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        MealCount = mealCount;
         if (_entries.Count >= MealCount) return MealPlanChangeResult.LimitReached;
 
         var dish = _dishes.FirstOrDefault(dish => dish.Id == dishId);
@@ -47,15 +50,18 @@ public sealed class MealPlanService
         return MealPlanChangeResult.Success;
     }
 
-    public async Task<MealPlanChangeResult> FillAsync()
+    public async Task<MealPlanChangeResult> FillAsync(CancellationToken cancellationToken = default)
     {
-        MealCount = await _settingsService.GetMealCountAsync();
+        var mealCount = await _settingsService.GetMealCountAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        MealCount = mealCount;
         var remaining = MealCount - _entries.Count;
         if (remaining <= 0) return MealPlanChangeResult.LimitReached;
 
         var existingDishIds = _entries.Select(entry => entry.Dish.Id).ToHashSet();
         var candidates = _dishes.Where(dish => !existingDishIds.Contains(dish.Id)).ToList();
         var additions = _generator.Generate(candidates, remaining);
+        cancellationToken.ThrowIfCancellationRequested();
         _entries.AddRange(additions.Select(dish => new MealPlanEntry(++_nextEntryId, dish)));
         return MealPlanChangeResult.Success;
     }

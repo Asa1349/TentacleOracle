@@ -3,13 +3,15 @@ using TentacleOracle.Services;
 
 namespace TentacleOracle.Components.Base;
 
-public abstract class BasePageWithControlsComponent<TControls> : ComponentBase, IDisposable
+public abstract class BasePageWithControlsComponent<TControls> : LifetimeComponentBase
     where TControls : ComponentBase
 {
     [Inject] protected NavigationStateService NavStateService { get; set; } = null!;
 
-    public virtual void Dispose()
+    public override void Dispose()
     {
+        if (IsDisposed) return;
+        base.Dispose();
         NavStateService.ClearControls(this);
         GC.SuppressFinalize(this);
     }

@@ -13,7 +13,9 @@ namespace TentacleOracle.Components.Pages;
 public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 {
     private bool _dishesLoaded;
+    private string? _loadError;
     private bool _mealPlanBusy;
+    private string? _mealPlanError;
     private int? _selectedMealPlanEntryId;
 
     [Inject] protected DishStateService DishStateService { get; set; } = null!;
@@ -25,12 +27,13 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
     [Inject] private ILogger<Dishes> Logger { get; set; } = null!;
 
     private bool CanRemoveMeal =>
-        !_mealPlanBusy && MealPlan.Entries.Any(entry => entry.Id == _selectedMealPlanEntryId);
+        !IsDisposed && !_mealPlanBusy && MealPlan.Entries.Any(entry => entry.Id == _selectedMealPlanEntryId);
 
-    private bool CanAddMeal => !_mealPlanBusy && DishStateService.SelectedDish is { } selected
-                                              && MealPlan.ContainsDish(selected.Id);
+    private bool CanAddMeal => !IsDisposed && _dishesLoaded && !_mealPlanBusy
+                               && DishStateService.SelectedDish is { } selected
+                               && MealPlan.ContainsDish(selected.Id);
 
-    private bool CanClearMealPlan => !_mealPlanBusy && MealPlan.Entries.Count > 0;
+    private bool CanClearMealPlan => !IsDisposed && !_mealPlanBusy && MealPlan.Entries.Count > 0;
 
     private string? SelectedGeneratedDishElementId => _selectedMealPlanEntryId is { } id
         ? $"generated-dish-{id}"
@@ -39,8 +42,8 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
     private async Task AddSelectedDishToMealPlan()
     {
         if (!CanAddMeal || DishStateService.SelectedDish is not { } selected) return;
-        await ChangeMealPlanAsync(() => MealPlan.AddDishAsync(selected.Id),
-            "The dish could not be added to the meal plan. Please try again.", selectAddedEntry: true);
+        await ChangeMealPlanAsync(token => MealPlan.AddDishAsync(selected.Id, token),
+            "The dish could not be added to the meal plan. Please reload the page.", selectAddedEntry: true);
     }
 
     private void RemoveSelectedMeal()
@@ -52,7 +55,7 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 
     private void ClearMealPlan()
     {
-        if (_mealPlanBusy) return;
+        if (IsDisposed || _mealPlanBusy) return;
         MealPlan.Clear();
         _selectedMealPlanEntryId = null;
     }
@@ -61,75 +64,107 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
     {
         if (!_dishesLoaded) return;
         await ChangeMealPlanAsync(MealPlan.FillAsync,
-            "The meal plan could not be generated. Please try again.");
+            "The meal plan could not be generated. Please reload the page.");
     }
 
-    private async Task ChangeMealPlanAsync(Func<Task<MealPlanChangeResult>> change, string errorMessage,
+    private async Task ChangeMealPlanAsync(Func<CancellationToken, Task<MealPlanChangeResult>> change,
+        string errorMessage,
         bool selectAddedEntry = false)
     {
-        if (_mealPlanBusy) return;
+        if (IsDisposed || _mealPlanBusy) return;
         _mealPlanBusy = true;
-        StateHasChanged();
+        _mealPlanError = null;
+        Refresh();
         try
         {
-            var result = await change();
-            if (result == MealPlanChangeResult.LimitReached)
-                await ShowMealPlanLimitAsync();
-            else if (result == MealPlanChangeResult.Success && selectAddedEntry)
-                _selectedMealPlanEntryId = MealPlan.Entries[^1].Id;
+            var result = await change(LifetimeToken);
+            if (IsDisposed) return;
+            switch (result)
+            {
+                case MealPlanChangeResult.LimitReached:
+                    await ShowMealPlanLimitAsync();
+                    break;
+                case MealPlanChangeResult.Success:
+                    if (selectAddedEntry)
+                        _selectedMealPlanEntryId = MealPlan.Entries[^1].Id;
+                    break;
+                case MealPlanChangeResult.DishNotFound:
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unexpected meal plan result: {result}.");
+            }
+        }
+        catch (OperationCanceledException) when (LifetimeToken.IsCancellationRequested)
+        {
+            // Expected when leaving the page; no error feedback is needed.
         }
         catch (Exception exception)
         {
+            if (IsDisposed) return;
             Logger.LogError(exception, "Could not update the meal plan.");
-            await DialogService.ShowMessageAsync(MessageBoxType.Error, errorMessage);
+            _mealPlanError = errorMessage;
         }
         finally
         {
-            _mealPlanBusy = false;
-            StateHasChanged();
+            if (!IsDisposed)
+            {
+                _mealPlanBusy = false;
+                Refresh();
+            }
         }
     }
 
     private Task<bool?> ShowMealPlanLimitAsync() => DialogService.ShowMessageAsync(MessageBoxType.Info,
-        $"No more dishes can be added. The meal plan limit is {MealPlan.MealCount} meals. Increase the number in Settings or remove dishes from the plan.");
+        $"No more dishes can be added. The meal plan limit is {MealPlan.MealCount} meals. Increase the number in Settings or remove dishes from the plan.",
+        cancellationToken: LifetimeToken);
 
     private void SelectGeneratedDish(MealPlanEntry entry)
     {
+        if (IsDisposed) return;
         _selectedMealPlanEntryId = entry.Id;
     }
 
     private async Task LoadDishes()
     {
+        if (IsDisposed) return;
         try
         {
-            await MealPlan.LoadAsync();
+            await MealPlan.LoadAsync(LifetimeToken);
+            if (IsDisposed) return;
             _dishesLoaded = true;
+        }
+        catch (OperationCanceledException) when (LifetimeToken.IsCancellationRequested)
+        {
+            // Expected when leaving the page; no error feedback is needed.
         }
         catch (Exception exception)
         {
+            if (IsDisposed) return;
             Logger.LogError(exception, "Could not load dishes.");
-            await DialogService.ShowMessageAsync(MessageBoxType.Error,
-                "Dishes could not be loaded. Please reload the page to try again.");
+            _loadError = "Dishes could not be loaded. Please reload the page.";
         }
     }
 
     private void OnDishAdded(Dish dish)
     {
+        if (IsDisposed) return;
         MealPlan.UpdateDish(dish);
-        StateHasChanged();
+        Refresh();
     }
 
     private void OnDishUpdated(Dish dish)
     {
+        if (IsDisposed) return;
         MealPlan.UpdateDish(dish);
-        StateHasChanged();
+        Refresh();
     }
 
     private void OnDishDeleted(int dishId)
     {
+        if (IsDisposed) return;
         MealPlan.RemoveDish(dishId);
         if (!CanRemoveMeal) _selectedMealPlanEntryId = null;
-        StateHasChanged();
+        Refresh();
     }
 
     #region Overrides
@@ -137,7 +172,8 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        DishStateService.OnChange += StateHasChanged;
+        if (IsDisposed) return;
+        DishStateService.OnChange += Refresh;
         DishStateService.DishAdded += OnDishAdded;
         DishStateService.DishUpdated += OnDishUpdated;
         DishStateService.DishDeleted += OnDishDeleted;
@@ -147,7 +183,8 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 
     public override void Dispose()
     {
-        DishStateService.OnChange -= StateHasChanged;
+        if (IsDisposed) return;
+        DishStateService.OnChange -= Refresh;
         DishStateService.DishAdded -= OnDishAdded;
         DishStateService.DishUpdated -= OnDishUpdated;
         DishStateService.DishDeleted -= OnDishDeleted;

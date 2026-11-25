@@ -1,6 +1,7 @@
+@namespace TentacleOracle.Components.Dialog
 @using TentacleOracle.Enums
 @using TentacleOracle.Extensions
-@namespace TentacleOracle.Components.Dialog
+@inherits TentacleOracle.Components.Base.LifetimeComponentBase
 
 <MudDialog Style="background: var(--color-background); color: var(--color-text-secondary);" ContentClass="pa-0">
     <DialogContent>
@@ -22,6 +23,7 @@
                             <InputText id="dish-name" @bind-Value="_model.Name" maxlength="100" autofocus/>
                             <ValidationMessage For="@(() => _model.Name)"/>
                         </div>
+                        ei
                         <div class="form-field">
                             <label for="dish-category">Category</label>
                             <MudAutocomplete T="string" InputId="dish-category"

@@ -10,8 +10,10 @@ public static class DialogServiceExtensions
     /// Returns true for Yes or OK, false for No, and null when dismissed.
     /// </summary>
     public static async Task<bool?> ShowMessageAsync(this IDialogService dialogService,
-        MessageBoxType type, string text, MessageBoxButtons buttons = MessageBoxButtons.Ok)
+        MessageBoxType type, string text, MessageBoxButtons buttons = MessageBoxButtons.Ok,
+        CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var parameters = new DialogParameters<MessageBoxDialog>
         {
             { dialog => dialog.Type, type },
@@ -28,7 +30,15 @@ public static class DialogServiceExtensions
         };
 
         var dialog = await dialogService.ShowAsync<MessageBoxDialog>(type.ToString(), parameters, options);
-        var result = await dialog.Result;
-        return result is { Canceled: false, Data: bool confirmed } ? confirmed : null;
+        try
+        {
+            var result = await dialog.Result.WaitAsync(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            return result is { Canceled: false, Data: bool confirmed } ? confirmed : null;
+        }
+        finally
+        {
+            if (cancellationToken.IsCancellationRequested) dialog.Close();
+        }
     }
 }

@@ -4,44 +4,38 @@ using TentacleOracle.Models;
 
 namespace TentacleOracle.Services;
 
-public abstract class DishService(IDbContextFactory<AppDbContext> contextFactory) : IDishService
+public sealed class DishService(IDbContextFactory<AppDbContext> contextFactory) : IDishService
 {
-    public async Task<List<Dish>> GetDishesAsync()
+    public async Task<List<Dish>> GetDishesAsync(CancellationToken cancellationToken = default)
     {
-        await using var db = await contextFactory.CreateDbContextAsync();
-        return await db.Dishes.AsNoTracking().ToListAsync();
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        return await db.Dishes.AsNoTracking().ToListAsync(cancellationToken);
     }
 
-    public async Task<Dish?> GetDishByIdAsync(int id)
+    public async Task AddDishAsync(Dish dish, CancellationToken cancellationToken = default)
     {
-        await using var db = await contextFactory.CreateDbContextAsync();
-        return await db.Dishes.AsNoTracking().SingleOrDefaultAsync(dish => dish.Id == id);
-    }
-
-    public async Task AddDishAsync(Dish dish)
-    {
-        await using var db = await contextFactory.CreateDbContextAsync();
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         db.Dishes.Add(dish);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateDishAsync(Dish dish)
+    public async Task UpdateDishAsync(Dish dish, CancellationToken cancellationToken = default)
     {
-        await using var db = await contextFactory.CreateDbContextAsync();
-        var existing = await db.Dishes.FindAsync(dish.Id)
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var existing = await db.Dishes.FindAsync([dish.Id], cancellationToken)
                        ?? throw new InvalidOperationException($"Dish {dish.Id} no longer exists.");
         db.Entry(existing).CurrentValues.SetValues(dish);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteDishAsync(int id)
+    public async Task DeleteDishAsync(int id, CancellationToken cancellationToken = default)
     {
-        await using var db = await contextFactory.CreateDbContextAsync();
-        var dish = await db.Dishes.FindAsync(id);
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var dish = await db.Dishes.FindAsync([id], cancellationToken);
         if (dish != null)
         {
             db.Dishes.Remove(dish);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
         }
     }
 }

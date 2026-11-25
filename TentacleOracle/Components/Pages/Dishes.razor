@@ -17,12 +17,27 @@
             </tr>
             </thead>
             <tbody>
-            <DishesTableInteractive Dishes="@(_dishesLoaded ? MealPlan.Dishes : null)"/>
+            @if (_loadError != null)
+            {
+                <tr>
+                    <td colspan="5">
+                        <p role="alert">@_loadError</p>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <DishesTableInteractive Dishes="@(_dishesLoaded ? MealPlan.Dishes : null)"/>
+            }
             </tbody>
         </table>
     </div>
 
     <section class="dishes-bottom-section" aria-label="Generated meal list">
+        @if (_mealPlanError != null)
+        {
+            <p role="alert">@_mealPlanError</p>
+        }
         <div class="panel-actions" role="group" aria-label="Panel controls">
             <MudTooltip Text="Remove from plan">
                 <button type="button" class="styled-button styled-button--icon" aria-label="Remove from plan"

@@ -1,6 +1,24 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)"/>
-        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
-    </Found>
-</Router>
+﻿@using TentacleOracle.Components.Layout
+@inject NavigationManager Navigation
+
+<ErrorBoundary>
+    <ChildContent>
+        <Router AppAssembly="typeof(Program).Assembly">
+            <Found Context="routeData">
+                <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)"/>
+                <FocusOnNavigate RouteData="routeData" Selector="h1"/>
+            </Found>
+        </Router>
+    </ChildContent>
+    <ErrorContent>
+        <section role="alert">
+            <h2>Something went wrong</h2>
+            <p>The page could not be displayed. Please reload it to try again.</p>
+            <button type="button" class="styled-button" @onclick="ReloadPage">Reload page</button>
+        </section>
+    </ErrorContent>
+</ErrorBoundary>
+
+@code {
+    private void ReloadPage() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+}

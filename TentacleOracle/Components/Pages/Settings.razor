@@ -8,7 +8,8 @@
 	<div class="settings-field">
 		<label for="meal-count">Number of meals to generate</label>
 		<InputNumber id="meal-count" @bind-Value="_model.MealCount"
-		             min="1" max="28" step="1" disabled="@_busy" aria-describedby="meal-count-help"/>
+		             min="1" max="28" step="1" disabled="@(_busy || !_settingsLoaded)"
+		             aria-describedby="meal-count-help"/>
 		<p id="meal-count-help">Choose 1–28 meals (up to four weeks with one meal per day).</p>
 		<ValidationMessage For="@(() => _model.MealCount)"/>
 	</div>

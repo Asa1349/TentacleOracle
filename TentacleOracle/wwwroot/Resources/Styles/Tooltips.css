@@ -1,4 +1,4 @@
-.mud-tooltip {
+.mud-tooltip.mud-tooltip-default {
     background-color: var(--color-surface);
     color: var(--color-text-secondary);
     border: 1px solid var(--color-background);
@@ -10,7 +10,7 @@
     line-height: 1.4;
 }
 
-.mud-tooltip .mud-tooltip-arrow {
-    color: var(--color-surface);
+.mud-tooltip.mud-tooltip-default.mud-tooltip-arrow::after {
+    border-color: var(--color-surface) transparent transparent transparent;
 }
 

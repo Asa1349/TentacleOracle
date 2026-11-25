@@ -2,13 +2,14 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
+using TentacleOracle.Components.Base;
 using TentacleOracle.Enums;
 using TentacleOracle.Models;
 using TentacleOracle.Services;
 
 namespace TentacleOracle.Components.Dialog;
 
-public partial class DishDialog : ComponentBase
+public partial class DishDialog : LifetimeComponentBase
 {
     private const string DropdownChevron =
         "<path d=\"M6 9l6 6 6-6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>";
@@ -47,7 +48,7 @@ public partial class DishDialog : ComponentBase
 
     private void Reset()
     {
-        if (_saving) return;
+        if (IsDisposed || _saving) return;
         _model = DishToEdit is { } dish
             ? new DishInput
             {
@@ -65,45 +66,59 @@ public partial class DishDialog : ComponentBase
 
     private void Cancel()
     {
-        if (!_saving) MudDialog.Cancel();
+        if (!IsDisposed && !_saving) MudDialog.Cancel();
     }
 
     private async Task SaveAsync()
     {
-        if (_saving) return;
+        if (IsDisposed || _saving) return;
         _saving = true;
         _error = null;
 
-        var dish = new Dish
-        {
-            Id = DishToEdit?.Id ?? 0,
-            Name = _model.Name.Trim(),
-            Category = (_model.Category ?? string.Empty).Trim(),
-            Kcal = _model.Kcal,
-            Effort = (int)_model.Effort,
-            RatingA = (int)_model.RatingA,
-            RatingR = (int)_model.RatingR
-        };
-
         try
         {
-            if (IsEditing)
-                await DishService.UpdateDishAsync(dish);
-            else
-                await DishService.AddDishAsync(dish);
-        }
-        catch (Exception exception)
-        {
-            Logger.LogError(exception, "Could not save dish {DishId} (editing: {IsEditing}).", dish.Id, IsEditing);
-            _error = "The dish could not be saved. Please try again.";
-            return;
+            var dish = CreateDishFromInput();
+            if (await TrySaveDishAsync(dish) && !IsDisposed)
+                MudDialog.Close(DialogResult.Ok(dish));
         }
         finally
         {
-            _saving = false;
+            if (!IsDisposed) _saving = false;
         }
+    }
 
-        MudDialog.Close(DialogResult.Ok(dish));
+    private Dish CreateDishFromInput() => new()
+    {
+        Id = DishToEdit?.Id ?? 0,
+        Name = _model.Name.Trim(),
+        Category = _model.Category.Trim(),
+        Kcal = _model.Kcal,
+        Effort = (int)_model.Effort,
+        RatingA = (int)_model.RatingA,
+        RatingR = (int)_model.RatingR
+    };
+
+    private async Task<bool> TrySaveDishAsync(Dish dish)
+    {
+        try
+        {
+            if (IsEditing)
+                await DishService.UpdateDishAsync(dish, LifetimeToken);
+            else
+                await DishService.AddDishAsync(dish, LifetimeToken);
+            return true;
+        }
+        catch (OperationCanceledException) when (LifetimeToken.IsCancellationRequested)
+        {
+            return false;
+        }
+        catch (Exception exception)
+        {
+            if (IsDisposed) return false;
+            Logger.LogError(exception, "Could not save dish {DishId} (editing: {IsEditing}).", dish.Id, IsEditing);
+            _error = "The dish could not be saved. Please try again.";
+            return false;
+        }
     }
 
     private sealed class DishInput

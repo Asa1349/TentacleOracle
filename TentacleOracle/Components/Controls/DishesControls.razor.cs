@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using TentacleOracle.Components.Base;
 using TentacleOracle.Components.Dialog;
 using TentacleOracle.Enums;
 using TentacleOracle.Extensions;
@@ -8,10 +9,24 @@ using TentacleOracle.Services;
 
 namespace TentacleOracle.Components.Controls;
 
-public partial class DishesControls : ComponentBase, IDisposable
+public partial class DishesControls : LifetimeComponentBase
 {
+    private static readonly DialogOptions DishDialogOptions = new()
+    {
+        NoHeader = true,
+        FullWidth = true,
+        MaxWidth = MaxWidth.Medium,
+        BackdropClick = false,
+        CloseOnEscapeKey = false
+    };
+
+    private IDialogReference? _activeDialog;
+
     private bool _dishDialogOpen;
+    private string? _error;
     private bool _generating;
+
+    private bool IsBusy => IsDisposed || _dishDialogOpen || _generating;
 
     [Inject] protected IDishService DishService { get; set; } = null!;
 
@@ -25,21 +40,31 @@ public partial class DishesControls : ComponentBase, IDisposable
 
     private async Task GenerateMealPlan()
     {
-        if (_generating || _dishDialogOpen) return;
+        if (IsBusy) return;
         _generating = true;
+        _error = null;
+        Refresh();
         try
         {
-            await DishStateService.RequestMealPlanGenerationAsync();
+            await DishStateService.RequestMealPlanGenerationAsync().WaitAsync(LifetimeToken);
+        }
+        catch (OperationCanceledException) when (LifetimeToken.IsCancellationRequested)
+        {
+            // Expected when leaving the page; no error feedback is needed.
         }
         catch (Exception exception)
         {
+            if (IsDisposed) return;
             Logger.LogError(exception, "Could not generate a meal plan.");
-            await DialogService.ShowMessageAsync(MessageBoxType.Error,
-                "The meal plan could not be generated. Please try again.");
+            _error = "The meal plan could not be generated. Please reload the page.";
         }
         finally
         {
-            _generating = false;
+            if (!IsDisposed)
+            {
+                _generating = false;
+                Refresh();
+            }
         }
     }
 
@@ -55,78 +80,110 @@ public partial class DishesControls : ComponentBase, IDisposable
 
     private async Task ShowDishDialogAsync(Dish? dishToEdit = null)
     {
-        if (_dishDialogOpen) return;
+        if (IsBusy) return;
         _dishDialogOpen = true;
+        _error = null;
+        Refresh();
 
         try
         {
-            var dishes = await DishService.GetDishesAsync();
-            var categories = dishes.Select(dish => dish.Category.Trim())
-                .Where(category => !string.IsNullOrWhiteSpace(category))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(category => category)
-                .ToList();
-
-            var parameters = new DialogParameters<DishDialog>
-            {
-                { dialog => dialog.Categories, categories },
-                { dialog => dialog.DishToEdit, dishToEdit }
-            };
-            var options = new DialogOptions
-            {
-                NoHeader = true,
-                FullWidth = true,
-                MaxWidth = MaxWidth.Medium,
-                BackdropClick = false,
-                CloseOnEscapeKey = false
-            };
-
-            var title = dishToEdit == null ? "Add Dish" : "Edit Dish";
-            var dialog = await DialogService.ShowAsync<DishDialog>(title, parameters, options);
-            var result = await dialog.Result;
-            if (result is { Canceled: false, Data: Dish savedDish })
-            {
-                if (dishToEdit == null)
-                    DishStateService.NotifyDishAdded(savedDish);
-                else
-                    DishStateService.NotifyDishUpdated(savedDish);
-            }
+            await ShowDishEditorAsync(dishToEdit);
+        }
+        catch (OperationCanceledException) when (LifetimeToken.IsCancellationRequested)
+        {
+            // Expected when leaving the page; no error feedback is needed.
+        }
+        catch (Exception exception)
+        {
+            if (IsDisposed) return;
+            Logger.LogError(exception, "Could not load or open the dish dialog.");
+            _error = "The dish dialog could not be loaded. Please reload the page.";
         }
         finally
         {
-            _dishDialogOpen = false;
+            if (!IsDisposed)
+            {
+                _activeDialog = null;
+                _dishDialogOpen = false;
+                Refresh();
+            }
         }
+    }
+
+    private async Task<List<string>> LoadCategoriesAsync()
+    {
+        var dishes = await DishService.GetDishesAsync(LifetimeToken);
+        LifetimeToken.ThrowIfCancellationRequested();
+        return dishes.Select(dish => dish.Category.Trim())
+            .Where(category => !string.IsNullOrWhiteSpace(category))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(category => category)
+            .ToList();
+    }
+
+    private async Task ShowDishEditorAsync(Dish? dishToEdit)
+    {
+        var categories = await LoadCategoriesAsync();
+        if (IsDisposed) return;
+
+        var parameters = new DialogParameters<DishDialog>
+        {
+            { dialog => dialog.Categories, categories },
+            { dialog => dialog.DishToEdit, dishToEdit }
+        };
+        var title = dishToEdit == null ? "Add Dish" : "Edit Dish";
+        var dialog = await DialogService.ShowAsync<DishDialog>(title, parameters, DishDialogOptions);
+        if (IsDisposed)
+        {
+            dialog.Close();
+            return;
+        }
+
+        _activeDialog = dialog;
+        var result = await dialog.Result.WaitAsync(LifetimeToken);
+        if (IsDisposed || result is not { Canceled: false, Data: Dish savedDish }) return;
+
+        if (dishToEdit == null)
+            DishStateService.NotifyDishAdded(savedDish);
+        else
+            DishStateService.NotifyDishUpdated(savedDish);
     }
 
     private async Task DeleteSelectedDish()
     {
-        if (_dishDialogOpen || SelectedDish is not { } dish) return;
+        if (IsBusy || SelectedDish is not { } dish) return;
         _dishDialogOpen = true;
+        _error = null;
+        Refresh();
 
         try
         {
             var message = $"Are you sure you want to remove the dish '{dish.Name}'?";
             var confirmed = await DialogService.ShowMessageAsync(MessageBoxType.Warning,
-                message, MessageBoxButtons.YesNo);
-            if (confirmed != true) return;
+                message, MessageBoxButtons.YesNo, LifetimeToken);
+            if (IsDisposed || confirmed != true) return;
 
-            try
-            {
-                await DishService.DeleteDishAsync(dish.Id);
-            }
-            catch (Exception exception)
-            {
-                Logger.LogError(exception, "Could not delete dish {DishId}.", dish.Id);
-                var errorMessage = $"The dish '{dish.Name}' could not be deleted. Please try again.";
-                await DialogService.ShowMessageAsync(MessageBoxType.Error, errorMessage);
-                return;
-            }
-
+            await DishService.DeleteDishAsync(dish.Id, LifetimeToken);
+            if (IsDisposed) return;
             DishStateService.NotifyDishDeleted(dish.Id);
+        }
+        catch (OperationCanceledException) when (LifetimeToken.IsCancellationRequested)
+        {
+            // Expected when leaving the page; no error feedback is needed.
+        }
+        catch (Exception exception)
+        {
+            if (IsDisposed) return;
+            Logger.LogError(exception, "Could not delete dish {DishId}.", dish.Id);
+            _error = $"The dish '{dish.Name}' could not be deleted. Please reload the page.";
         }
         finally
         {
-            _dishDialogOpen = false;
+            if (!IsDisposed)
+            {
+                _dishDialogOpen = false;
+                Refresh();
+            }
         }
     }
 
@@ -135,12 +192,15 @@ public partial class DishesControls : ComponentBase, IDisposable
 
     protected override void OnInitialized()
     {
-        DishStateService.OnChange += StateHasChanged;
+        DishStateService.OnChange += Refresh;
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        DishStateService.OnChange -= StateHasChanged;
+        if (IsDisposed) return;
+        DishStateService.OnChange -= Refresh;
+        base.Dispose();
+        _activeDialog?.Close();
         GC.SuppressFinalize(this);
     }
 
