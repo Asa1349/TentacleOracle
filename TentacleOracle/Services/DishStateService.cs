@@ -24,11 +24,13 @@ public class DishStateService
 
     public event Action<int>? DishDeleted;
 
-    public event Action? MealPlanGenerationRequested;
+    public event Func<Task>? MealPlanGenerationRequested;
 
-    public void RequestMealPlanGeneration()
+    public async Task RequestMealPlanGenerationAsync()
     {
-        MealPlanGenerationRequested?.Invoke();
+        if (MealPlanGenerationRequested is { } handlers)
+            foreach (Func<Task> handler in handlers.GetInvocationList())
+                await handler();
     }
 
     public void NotifyDishAdded(Dish dish)

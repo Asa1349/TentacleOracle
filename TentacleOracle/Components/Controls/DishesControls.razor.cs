@@ -32,7 +32,7 @@ public partial class DishesControls : ComponentBase, IDisposable
         try
         {
             await SettingsState.LoadAsync();
-            DishStateService.RequestMealPlanGeneration();
+            await DishStateService.RequestMealPlanGenerationAsync();
         }
         catch (Exception exception)
         {

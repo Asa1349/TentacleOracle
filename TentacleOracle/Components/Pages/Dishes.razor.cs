@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using MudBlazor;
 using TentacleOracle.BusinessLogic;
 using TentacleOracle.Components.Base;
 using TentacleOracle.Components.Controls;
+using TentacleOracle.Enums;
+using TentacleOracle.Extensions;
 using TentacleOracle.Models;
 using TentacleOracle.Services;
 
@@ -12,6 +15,7 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 {
     private List<Dish>? _dishes;
     private List<MealPlanEntry>? _generatedDishes;
+    private bool _mealPlanBusy;
     private int _nextMealPlanEntryId;
     private int? _selectedMealPlanEntryId;
     [Inject] protected IDishService DishService { get; set; } = null!;
@@ -22,25 +26,52 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 
     [Inject] private SettingsStateService SettingsState { get; set; } = null!;
 
-    private bool CanRemoveMeal => _generatedDishes?.Any(entry => entry.Id == _selectedMealPlanEntryId) == true;
+    [Inject] private IDialogService DialogService { get; set; } = null!;
 
-    private bool CanAddMeal => DishStateService.SelectedDish is { } selected
-                               && _dishes?.Any(dish => dish.Id == selected.Id) == true;
+    [Inject] private ILogger<Dishes> Logger { get; set; } = null!;
 
-    private bool CanClearMealPlan => _generatedDishes is { Count: > 0 };
+    private bool CanRemoveMeal =>
+        !_mealPlanBusy && _generatedDishes?.Any(entry => entry.Id == _selectedMealPlanEntryId) == true;
+
+    private bool CanAddMeal => !_mealPlanBusy && DishStateService.SelectedDish is { } selected
+                                              && _dishes?.Any(dish => dish.Id == selected.Id) == true;
+
+    private bool CanClearMealPlan => !_mealPlanBusy && _generatedDishes is { Count: > 0 };
 
     private string? SelectedGeneratedDishElementId => _selectedMealPlanEntryId is { } id
         ? $"generated-dish-{id}"
         : null;
 
-    private void AddSelectedDishToMealPlan()
+    private async Task AddSelectedDishToMealPlan()
     {
         if (!CanAddMeal || DishStateService.SelectedDish is not { } selected) return;
-        var dish = _dishes!.First(dish => dish.Id == selected.Id);
-        _generatedDishes ??= [];
-        var entry = new MealPlanEntry(++_nextMealPlanEntryId, dish);
-        _generatedDishes.Add(entry);
-        _selectedMealPlanEntryId = entry.Id;
+        _mealPlanBusy = true;
+        try
+        {
+            await SettingsState.LoadAsync();
+            if ((_generatedDishes?.Count ?? 0) >= SettingsState.MealCount)
+            {
+                await ShowMealPlanLimitAsync();
+                return;
+            }
+
+            var dish = _dishes?.FirstOrDefault(dish => dish.Id == selected.Id);
+            if (dish == null) return;
+            _generatedDishes ??= [];
+            var entry = new MealPlanEntry(++_nextMealPlanEntryId, dish);
+            _generatedDishes.Add(entry);
+            _selectedMealPlanEntryId = entry.Id;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not add a dish to the meal plan.");
+            await DialogService.ShowMessageAsync(MessageBoxType.Error,
+                "The dish could not be added to the meal plan. Please try again.");
+        }
+        finally
+        {
+            _mealPlanBusy = false;
+        }
     }
 
     private void RemoveSelectedMeal()
@@ -52,19 +83,41 @@ public partial class Dishes : BasePageWithControlsComponent<DishesControls>
 
     private void ClearMealPlan()
     {
+        if (_mealPlanBusy) return;
         _generatedDishes = [];
         _selectedMealPlanEntryId = null;
     }
 
 
-    private void GenerateMealPlan()
+    private async Task GenerateMealPlan()
     {
-        if (_dishes == null) return;
-        _generatedDishes = MealPlanGenerator.Generate(_dishes, SettingsState.MealCount)
-            .Select(dish => new MealPlanEntry(++_nextMealPlanEntryId, dish)).ToList();
-        _selectedMealPlanEntryId = null;
+        if (_dishes == null || _mealPlanBusy) return;
+        _mealPlanBusy = true;
         StateHasChanged();
+        try
+        {
+            var remaining = SettingsState.MealCount - (_generatedDishes?.Count ?? 0);
+            if (remaining <= 0)
+            {
+                await ShowMealPlanLimitAsync();
+                return;
+            }
+
+            var existingDishIds = _generatedDishes?.Select(entry => entry.Dish.Id).ToHashSet() ?? [];
+            var candidates = _dishes.Where(dish => !existingDishIds.Contains(dish.Id)).ToList();
+            var additions = MealPlanGenerator.Generate(candidates, remaining);
+            _generatedDishes ??= [];
+            _generatedDishes.AddRange(additions.Select(dish => new MealPlanEntry(++_nextMealPlanEntryId, dish)));
+        }
+        finally
+        {
+            _mealPlanBusy = false;
+            StateHasChanged();
+        }
     }
+
+    private Task<bool?> ShowMealPlanLimitAsync() => DialogService.ShowMessageAsync(MessageBoxType.Info,
+        $"No more dishes can be added. The meal plan limit is {SettingsState.MealCount} meals. Increase the number in Settings or remove dishes from the plan.");
 
     private void SelectGeneratedDish(MealPlanEntry entry)
     {
