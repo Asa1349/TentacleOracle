@@ -6,77 +6,49 @@ namespace TentacleOracle.Services;
 
 public class DishService : IDishService
 {
-    private readonly AppDbContext _db;
+    private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
-    public DishService(AppDbContext db)
+    public DishService(IDbContextFactory<AppDbContext> contextFactory)
     {
-        _db = db;
+        _contextFactory = contextFactory;
     }
 
     public async Task<List<Dish>> GetDishesAsync()
     {
-        return await _db.Dishes.ToListAsync();
+        await using var db = await _contextFactory.CreateDbContextAsync();
+        return await db.Dishes.AsNoTracking().ToListAsync();
     }
 
     public async Task<Dish?> GetDishByIdAsync(int id)
     {
-        return await _db.Dishes.FindAsync(id);
+        await using var db = await _contextFactory.CreateDbContextAsync();
+        return await db.Dishes.AsNoTracking().SingleOrDefaultAsync(dish => dish.Id == id);
     }
 
     public async Task AddDishAsync(Dish dish)
     {
-        _db.Dishes.Add(dish);
-        try
-        {
-            await _db.SaveChangesAsync();
-        }
-        catch
-        {
-            // Prevent a later retry from persisting the failed insert as well.
-            _db.Entry(dish).State = EntityState.Detached;
-            throw;
-        }
+        await using var db = await _contextFactory.CreateDbContextAsync();
+        db.Dishes.Add(dish);
+        await db.SaveChangesAsync();
     }
 
     public async Task UpdateDishAsync(Dish dish)
     {
-        var existing = await _db.Dishes.FindAsync(dish.Id)
+        await using var db = await _contextFactory.CreateDbContextAsync();
+        var existing = await db.Dishes.FindAsync(dish.Id)
                        ?? throw new InvalidOperationException($"Dish {dish.Id} no longer exists.");
-        var entry = _db.Entry(existing);
-        var previousValues = entry.CurrentValues.Clone();
-
-        try
-        {
-            entry.CurrentValues.SetValues(dish);
-            await _db.SaveChangesAsync();
-        }
-        catch
-        {
-            // Keep failed edits out of the UI and subsequent saves.
-            entry.CurrentValues.SetValues(previousValues);
-            entry.State = EntityState.Unchanged;
-            throw;
-        }
+        db.Entry(existing).CurrentValues.SetValues(dish);
+        await db.SaveChangesAsync();
     }
 
     public async Task DeleteDishAsync(int id)
     {
-        var dish = await _db.Dishes.FindAsync(id);
+        await using var db = await _contextFactory.CreateDbContextAsync();
+        var dish = await db.Dishes.FindAsync(id);
         if (dish != null)
         {
-            var entry = _db.Entry(dish);
-            var previousState = entry.State;
-            try
-            {
-                _db.Dishes.Remove(dish);
-                await _db.SaveChangesAsync();
-            }
-            catch
-            {
-                // Do not leave a failed deletion pending for a later save.
-                entry.State = previousState;
-                throw;
-            }
+            db.Dishes.Remove(dish);
+            await db.SaveChangesAsync();
         }
     }
 }
