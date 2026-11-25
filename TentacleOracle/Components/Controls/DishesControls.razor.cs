@@ -13,8 +13,6 @@ public partial class DishesControls : ComponentBase, IDisposable
     private bool _dishDialogOpen;
     private bool _generating;
 
-    [Inject] private SettingsStateService SettingsState { get; set; } = null!;
-
     [Inject] protected IDishService DishService { get; set; } = null!;
 
     [Inject] protected DishStateService DishStateService { get; set; } = null!;
@@ -31,7 +29,6 @@ public partial class DishesControls : ComponentBase, IDisposable
         _generating = true;
         try
         {
-            await SettingsState.LoadAsync();
             await DishStateService.RequestMealPlanGenerationAsync();
         }
         catch (Exception exception)
@@ -144,6 +141,7 @@ public partial class DishesControls : ComponentBase, IDisposable
     public void Dispose()
     {
         DishStateService.OnChange -= StateHasChanged;
+        GC.SuppressFinalize(this);
     }
 
     #endregion

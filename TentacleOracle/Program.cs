@@ -41,7 +41,9 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<IDishService, DishService>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<IMealPlanGenerator, MealPlanGenerator>();
+builder.Services.AddTransient<MealPlanService>();
 builder.Services.AddScoped<DishStateService>();
 builder.Services.AddScoped<SettingsStateService>();
 builder.Services.AddScoped<NavigationStateService>();

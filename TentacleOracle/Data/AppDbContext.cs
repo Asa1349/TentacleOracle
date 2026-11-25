@@ -3,12 +3,8 @@ using TentacleOracle.Models;
 
 namespace TentacleOracle.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-    }
-
     public DbSet<Dish> Dishes { get; set; }
 
     public DbSet<AppSettings> AppSettings { get; set; }

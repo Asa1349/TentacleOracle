@@ -28,9 +28,8 @@ public class DishStateService
 
     public async Task RequestMealPlanGenerationAsync()
     {
-        if (MealPlanGenerationRequested is { } handlers)
-            foreach (Func<Task> handler in handlers.GetInvocationList())
-                await handler();
+        foreach (var handler in Delegate.EnumerateInvocationList(MealPlanGenerationRequested))
+            await handler();
     }
 
     public void NotifyDishAdded(Dish dish)

@@ -17,7 +17,7 @@
             </tr>
             </thead>
             <tbody>
-            <DishesTableInteractive Dishes="_dishes"/>
+            <DishesTableInteractive Dishes="@(_dishesLoaded ? MealPlan.Dishes : null)"/>
             </tbody>
         </table>
     </div>
@@ -44,12 +44,11 @@
             </MudTooltip>
         </div>
         <div class="dishes-bottom-box" aria-live="polite" aria-atomic="true">
-            @if (_generatedDishes is { Count: > 0 })
+            @if (MealPlan.Entries.Count > 0)
             {
                 <ul class="generated-meal-list" role="listbox" aria-label="Generated meal list"
-                    tabindex="0" aria-activedescendant="@SelectedGeneratedDishElementId"
-                    @onkeydown="HandleMealPlanKeyDown">
-                    @foreach (var entry in _generatedDishes)
+                    tabindex="0" aria-activedescendant="@SelectedGeneratedDishElementId">
+                    @foreach (var entry in MealPlan.Entries)
                     {
                         var isSelected = entry.Id == _selectedMealPlanEntryId;
                         <li @key="entry.Id" id="@($"generated-dish-{entry.Id}")" role="option"

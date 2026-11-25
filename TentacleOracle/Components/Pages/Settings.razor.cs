@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using TentacleOracle.Components.Base;
 using TentacleOracle.Components.Controls;
+using TentacleOracle.Models;
 using TentacleOracle.Services;
 
 namespace TentacleOracle.Components.Pages;
@@ -10,13 +11,15 @@ namespace TentacleOracle.Components.Pages;
 public partial class Settings : BasePageWithControlsComponent<SettingsControls>
 {
     private bool _busy;
-    private EditContext _editContext = null!;
+    private EditContext? _editContext;
     private string? _error;
 
     private SettingsInput _model = new();
+    private int _persistedMealCount = AppSettings.DefaultMealCount;
     private bool _saved;
     [Inject] private ILogger<Settings> Logger { get; set; } = null!;
     [Inject] private SettingsStateService SettingsState { get; set; } = null!;
+    [Inject] private ISettingsService SettingsService { get; set; } = null!;
 
     protected override void OnInitialized()
     {
@@ -36,7 +39,7 @@ public partial class Settings : BasePageWithControlsComponent<SettingsControls>
     {
         if (_busy) return;
         _saved = false;
-        if (_editContext.Validate()) await SaveValidSettingsAsync();
+        if (_editContext?.Validate() == true) await SaveValidSettingsAsync();
         StateHasChanged();
     }
 
@@ -49,7 +52,8 @@ public partial class Settings : BasePageWithControlsComponent<SettingsControls>
         StateHasChanged();
         try
         {
-            await SettingsState.SaveMealCountAsync(_model.MealCount);
+            await SettingsService.SaveMealCountAsync(_model.MealCount);
+            _persistedMealCount = _model.MealCount;
             _saved = true;
         }
         catch (Exception exception)
@@ -73,7 +77,7 @@ public partial class Settings : BasePageWithControlsComponent<SettingsControls>
         StateHasChanged();
         try
         {
-            await SettingsState.LoadAsync();
+            _persistedMealCount = await SettingsService.GetMealCountAsync();
             ResetForm();
         }
         catch (Exception exception)
@@ -91,7 +95,7 @@ public partial class Settings : BasePageWithControlsComponent<SettingsControls>
     private void ResetForm()
     {
         if (_editContext != null) _editContext.OnFieldChanged -= OnFieldChanged;
-        _model = new SettingsInput { MealCount = SettingsState.MealCount };
+        _model = new SettingsInput { MealCount = _persistedMealCount };
         _editContext = new EditContext(_model);
         _editContext.OnFieldChanged += OnFieldChanged;
         _saved = false;
@@ -107,14 +111,15 @@ public partial class Settings : BasePageWithControlsComponent<SettingsControls>
     {
         SettingsState.SaveRequested -= SaveSettingsAsync;
         SettingsState.ResetRequested -= ResetChangesAsync;
-        _editContext.OnFieldChanged -= OnFieldChanged;
+        if (_editContext != null) _editContext.OnFieldChanged -= OnFieldChanged;
         base.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private sealed class SettingsInput
     {
-        [Range(SettingsStateService.MinimumMealCount, SettingsStateService.MaximumMealCount,
+        [Range(AppSettings.MinimumMealCount, AppSettings.MaximumMealCount,
             ErrorMessage = "Please enter a whole number between 1 and 28.")]
-        public int MealCount { get; set; } = SettingsStateService.DefaultMealCount;
+        public int MealCount { get; set; } = AppSettings.DefaultMealCount;
     }
 }
