@@ -33,6 +33,28 @@ The heart of the application is a custom selection algorithm that goes beyond si
 
 ---
 
+## Unit Tests
+
+`TentacleOracle.Tests` uses NUnit and Moq and mirrors the application's `BusinessLogic`
+and `Services` folders. Run all tests from the solution directory:
+
+```shell
+dotnet test TentacleOracle.sln
+```
+
+The tests also appear in Rider's Unit Tests window. No running application or browser
+is required. Persistence tests use an isolated SQLite database held in memory.
+
+* `TestData` contains shared cases, a dish factory, a strict-Moq meal-plan context, and the SQLite test database.
+* Related cases use `TestCase` or `TestCaseSource`; shared sources are reused across test classes.
+* Random selection is tested by count, membership, uniqueness, and unchanged input, not a particular order.
+* Cancellation tests control asynchronous completion with Moq, without sleeps.
+* `DishService` and `SettingsService` run against real EF Core/SQLite persistence because mocking EF internals would not verify database behavior.
+
+Razor rendering is not covered; component tests can be added separately.
+
+---
+
 ## Future Roadmap
 
 The FoodOracle is actively being expanded with the following features:
