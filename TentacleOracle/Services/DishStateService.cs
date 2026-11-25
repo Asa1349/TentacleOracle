@@ -1,4 +1,5 @@
-﻿using TentacleOracle.Models;
+﻿using TentacleOracle.Extensions;
+using TentacleOracle.Models;
 
 namespace TentacleOracle.Services;
 
@@ -26,11 +27,7 @@ public class DishStateService
 
     public event Func<Task>? MealPlanGenerationRequested;
 
-    public async Task RequestMealPlanGenerationAsync()
-    {
-        foreach (var handler in Delegate.EnumerateInvocationList(MealPlanGenerationRequested))
-            await handler();
-    }
+    public Task RequestMealPlanGenerationAsync() => MealPlanGenerationRequested.InvokeSequentiallyAsync();
 
     public void NotifyDishAdded(Dish dish)
     {

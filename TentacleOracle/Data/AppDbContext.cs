@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TentacleOracle.Models;
+using AppSettingsModel = TentacleOracle.Models.AppSettings;
 
 namespace TentacleOracle.Data;
 
@@ -15,8 +16,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<AppSettings>(entity =>
         {
             entity.Property(settings => settings.Id).ValueGeneratedNever();
-            entity.Property(settings => settings.MealCount).HasDefaultValue(7);
-            entity.HasData(new AppSettings { Id = 1, MealCount = 7 });
+            entity.Property(settings => settings.MealCount).HasDefaultValue(AppSettingsModel.DefaultMealCount);
+            entity.HasData(new AppSettingsModel { Id = 1 });
         });
     }
 }

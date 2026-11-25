@@ -1,0 +1,32 @@
+.dish-dialog .form-field label,
+.settings-field label {
+    color: var(--color-accent);
+}
+
+.dish-dialog .form-field input,
+.dish-dialog .form-field select,
+.settings-field input {
+    width: 100%;
+    min-width: 0;
+    padding: 5px 8px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font: inherit;
+    color-scheme: dark;
+}
+
+.dish-dialog .form-field input:focus,
+.dish-dialog .form-field select:focus,
+.settings-field input:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.dish-dialog .validation-message,
+.dish-dialog .save-error,
+.settings-field .validation-message {
+    color: #ffb4ab;
+}
+

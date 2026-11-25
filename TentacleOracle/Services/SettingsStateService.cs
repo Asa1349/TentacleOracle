@@ -1,3 +1,5 @@
+using TentacleOracle.Extensions;
+
 namespace TentacleOracle.Services;
 
 public sealed class SettingsStateService
@@ -5,15 +7,7 @@ public sealed class SettingsStateService
     public event Func<Task>? SaveRequested;
     public event Func<Task>? ResetRequested;
 
-    public async Task RequestSaveAsync()
-    {
-        foreach (var handler in Delegate.EnumerateInvocationList(SaveRequested))
-            await handler();
-    }
+    public Task RequestSaveAsync() => SaveRequested.InvokeSequentiallyAsync();
 
-    public async Task RequestResetAsync()
-    {
-        foreach (var handler in Delegate.EnumerateInvocationList(ResetRequested))
-            await handler();
-    }
+    public Task RequestResetAsync() => ResetRequested.InvokeSequentiallyAsync();
 }

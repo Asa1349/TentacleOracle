@@ -3,20 +3,6 @@
     color: var(--color-text-secondary);
 }
 
-.dialog-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 12px;
-    background: var(--color-header);
-    color: var(--color-accent);
-}
-
-.dialog-header h2 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
 
 .dialog-body {
     padding: 20px 24px 28px;

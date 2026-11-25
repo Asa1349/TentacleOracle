@@ -27,7 +27,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 var sqliteBuilder = new SqliteConnectionStringBuilder(connectionString);
-if (!string.IsNullOrWhiteSpace(sqliteBuilder.DataSource) && !Path.IsPathRooted(sqliteBuilder.DataSource))
+var isFileDatabase = sqliteBuilder.Mode != SqliteOpenMode.Memory
+                     && !string.IsNullOrWhiteSpace(sqliteBuilder.DataSource)
+                     && sqliteBuilder.DataSource != ":memory:";
+if (isFileDatabase && !Path.IsPathRooted(sqliteBuilder.DataSource))
 {
     sqliteBuilder.DataSource =
         Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, sqliteBuilder.DataSource));
@@ -59,27 +62,13 @@ using (var scope = app.Services.CreateScope())
     {
         var dbContext = services.GetRequiredService<AppDbContext>();
 
-        var dbConnectionString = dbContext.Database.GetConnectionString();
-        if (!string.IsNullOrEmpty(dbConnectionString))
+        if (isFileDatabase)
         {
-            var dataSourcePrefix = "Data Source=";
-            var startIndex = dbConnectionString.IndexOf(dataSourcePrefix, StringComparison.OrdinalIgnoreCase);
-            if (startIndex >= 0)
+            var directory = Path.GetDirectoryName(sqliteBuilder.DataSource);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
             {
-                var dbPath = dbConnectionString[(startIndex + dataSourcePrefix.Length)..];
-                var semicolonIndex = dbPath.IndexOf(';');
-                if (semicolonIndex >= 0)
-                {
-                    dbPath = dbPath[..semicolonIndex];
-                }
-
-                var directory = Path.GetDirectoryName(dbPath);
-
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                    logger.LogInformation("Database directory created: {Directory}", directory);
-                }
+                Directory.CreateDirectory(directory);
+                logger.LogInformation("Database directory created: {Directory}", directory);
             }
         }
 

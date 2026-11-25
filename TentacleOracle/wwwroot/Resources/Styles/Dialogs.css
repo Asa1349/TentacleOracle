@@ -1,0 +1,16 @@
+.dish-dialog .dialog-header,
+.message-box .dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 12px;
+    background: var(--color-header);
+    color: var(--color-accent);
+}
+
+.dish-dialog .dialog-header h2,
+.message-box .dialog-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}

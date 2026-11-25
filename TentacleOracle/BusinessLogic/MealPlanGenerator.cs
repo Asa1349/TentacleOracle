@@ -4,7 +4,7 @@ namespace TentacleOracle.BusinessLogic;
 
 public sealed class MealPlanGenerator : IMealPlanGenerator
 {
-    public IReadOnlyList<Dish> Generate(IReadOnlyList<Dish> dishes, int count = 7)
+    public IReadOnlyList<Dish> Generate(IReadOnlyList<Dish> dishes, int count = AppSettings.DefaultMealCount)
     {
         ArgumentNullException.ThrowIfNull(dishes);
         ArgumentOutOfRangeException.ThrowIfNegative(count);

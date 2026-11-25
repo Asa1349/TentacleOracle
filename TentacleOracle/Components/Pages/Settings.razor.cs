@@ -142,7 +142,7 @@ public partial class Settings : BasePageWithControlsComponent<SettingsControls>
     private sealed class SettingsInput
     {
         [Range(AppSettings.MinimumMealCount, AppSettings.MaximumMealCount,
-            ErrorMessage = "Please enter a whole number between 1 and 28.")]
+            ErrorMessage = "Please enter a whole number between {1} and {2}.")]
         public int MealCount { get; set; } = AppSettings.DefaultMealCount;
     }
 }

@@ -108,9 +108,3 @@
     color: var(--color-accent);
 }
 
-.empty-meal-list {
-    margin: 0;
-    padding: 20px 24px;
-    color: var(--color-text-secondary);
-}
-
