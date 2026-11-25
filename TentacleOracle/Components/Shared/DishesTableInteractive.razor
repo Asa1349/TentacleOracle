@@ -1,5 +1,6 @@
-﻿@using TentacleOracle.Services
-@inject DishStateService DishStateService
+﻿@inject DishStateService DishStateService
+@using TentacleOracle.BusinessLogic
+@using TentacleOracle.Services
 @implements IDisposable
 @rendermode InteractiveServer
 
@@ -22,7 +23,7 @@ else
             <td>@dish.Category</td>
             <td>@dish.Kcal</td>
             <td>@dish.Effort</td>
-            <td>@((dish.RatingA + dish.RatingR)/2.0)</td>
+            <td>@(dish.GetAverageRating()?.ToString() ?? "–")</td>
         </tr>
     }
 }
