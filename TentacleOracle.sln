@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TentacleOracle", "TentacleOracle\TentacleOracle.csproj", "{6BDBBB42-01E3-4F7C-A274-0298508BC2FC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TentacleOracle.Tests", "TentacleOracle.Tests\TentacleOracle.Tests.csproj", "{51AD408F-9631-4EEA-A7C3-D4EA0BF5C9B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{6BDBBB42-01E3-4F7C-A274-0298508BC2FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BDBBB42-01E3-4F7C-A274-0298508BC2FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BDBBB42-01E3-4F7C-A274-0298508BC2FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51AD408F-9631-4EEA-A7C3-D4EA0BF5C9B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51AD408F-9631-4EEA-A7C3-D4EA0BF5C9B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51AD408F-9631-4EEA-A7C3-D4EA0BF5C9B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51AD408F-9631-4EEA-A7C3-D4EA0BF5C9B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

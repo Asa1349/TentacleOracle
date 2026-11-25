@@ -33,6 +33,13 @@ The heart of the application is a custom selection algorithm that goes beyond si
 
 ---
 
+## Testing
+
+The solution includes unit tests using NUnit and Moq, as well as integration tests
+against an isolated SQLite database in memory.
+
+---
+
 ## Future Roadmap
 
 The FoodOracle is actively being expanded with the following features:
