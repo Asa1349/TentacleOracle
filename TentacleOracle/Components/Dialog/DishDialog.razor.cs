@@ -2,8 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
+using TentacleOracle.Enums;
 using TentacleOracle.Models;
-using TentacleOracle.Models.Enums;
 using TentacleOracle.Services;
 
 namespace TentacleOracle.Components.Dialog;

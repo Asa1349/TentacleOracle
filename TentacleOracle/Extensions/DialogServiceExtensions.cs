@@ -1,6 +1,6 @@
 using MudBlazor;
 using TentacleOracle.Components.Dialog;
-using TentacleOracle.Models.Enums;
+using TentacleOracle.Enums;
 
 namespace TentacleOracle.Extensions;
 

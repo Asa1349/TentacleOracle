@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using TentacleOracle.Models.Enums;
+using TentacleOracle.Enums;
 
 namespace TentacleOracle.Components.Dialog;
 

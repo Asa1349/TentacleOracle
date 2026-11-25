@@ -1,4 +1,4 @@
-namespace TentacleOracle.Models.Enums;
+namespace TentacleOracle.Enums;
 
 public enum MessageBoxType
 {

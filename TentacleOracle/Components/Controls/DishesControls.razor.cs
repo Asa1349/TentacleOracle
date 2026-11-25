@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using TentacleOracle.Components.Dialog;
+using TentacleOracle.Enums;
 using TentacleOracle.Extensions;
 using TentacleOracle.Models;
-using TentacleOracle.Models.Enums;
 using TentacleOracle.Services;
 
 namespace TentacleOracle.Components.Controls;
